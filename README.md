@@ -2,14 +2,6 @@
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title></title>
-	<meta name="generator" content="LibreOffice 6.0.7.3 (Linux)"/>
-	<meta name="created" content="00:00:00"/>
-	<meta name="changed" content="2019-08-03T16:25:42.537179541"/>
-	<style type="text/css">
-		@page { margin: 2cm }
-		p { margin-bottom: 0.25cm; line-height: 115% }
-	</style>
 </head>
 <body lang="en-GB" dir="ltr">
 <p style="margin-bottom: 0cm; line-height: 100%"><font face="Noto Mono">This
