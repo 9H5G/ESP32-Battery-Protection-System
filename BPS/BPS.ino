@@ -1,6 +1,8 @@
 #define DEBUGLEVEL 3
 #include <DebugUtils.h>
 
+const long vers = 324500;
+
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 #include <ArduinoOTA.h>
@@ -24,20 +26,24 @@
 #define LVCLED     "bps/LVCled"
 #define HVCLED    "bps/HVCled"
 #define CUTOFF    "bps/cutoff"
+#define UPTIME     "bps/uptime"
+#define TEMP1      "bps/temp1"
+#define TEMP2      "bps/temp2"
+#define ALARM      "bps/alarm"
+#define DELTASUM  "bps/deltaSum"
+
 #define FORMAT_SPIFFS_IF_FAILED true
 
-//#define  TESTING 1
+#define  TESTING 1
 
 int inc = 1;
 
 long runcounter = 0;
-const long vers = 324600;
 
 bool defaultsettings = false;
 bool outputTest = false;
 unsigned long uptime;
-bool ChirpBeep = true;
-int pulseLength = 200;
+int pulseLength = 250;
 
 /*
    Alarmcodes
@@ -47,20 +53,22 @@ int lowchirp = 1;
 int chirp = 2;
 int highchirp = 3;
 
+/*
+   Pins
+*/
+
 const int lowcut = 20;
 const int lowon = 21;
 
 const int highcut = 30;
 const int highon = 31;
 
-/*
-   Pins
-*/
 const int LVCONPIN = 17;
 const int LVCOFFPIN = 5;
-const int LEDPINLVC = 26;
 
+const int LEDPINLVC = 26;
 const int LEDPINHVC = 25;
+
 const int HVCOFFPIN = 16;
 const int HVCONPIN = 4;
 
@@ -85,13 +93,23 @@ const int ADC2 = 34;
 const int ADC3 = 39;
 const int ADC4 = 36;
 
+const int JTAG1 = 13;
+const int JTAG2 = 12;
+const int JTAG3 = 14;
+const int JTAG4 = 15;
+
+const int CANCELALARM = 13;
+/*
+ * Copy to credentials.ino and fill in your details
 const char* ssid = "";
 const char* password = "";
-const char* Host = "BPS32";
-const char* MQ_client = "BPStest";       // your MQTT Client ID
-const char* MQ_user = "";//"mosquitto";       // your MQTT
-const char* MQ_pass = "";       // your MQTT password
+const char* Host = "";
+const char* MQ_client = "";       // your MQTT Client ID
+const char* MQ_user = "";//"mosquitto";       // your MQTT password
+const char* MQ_pass = "";       // your network password
 const char* mqtt_server = "192.168.0.4";
+*/
+
 const bool  wifi = true;
 
 char          WifiSSID[32];
@@ -134,6 +152,8 @@ int highcellv = 0;
 int lowcellv = 0;
 int delta = 0;
 int Cell[] = {3250, 3251, 3252, 3253};
+int cellAve[] = {3250, 3251, 3252, 3253};
+int deltaSum = 0;
 
 #ifdef TESTING
 int testCell[] = {3300, 3300, 3340, 3300};
@@ -142,10 +162,6 @@ int testCell[] = {3300, 3300, 3340, 3300};
 int ChirpSilencePeriod = 30; //seconds
 unsigned long timervar = 0;
 
-int32_t cellAve[] = {3250, 3250, 3250, 3250};
-
-int             deltawarn = 40;
-int             deltacutoff = 80;
 long          high_cellwarn = 3500;
 long          high_cellcutoff = 3550;
 long          low_cellwarn = 2600;
@@ -154,14 +170,24 @@ long          high_bankwarn = 13850;
 long          high_bankcutoff = 14200;
 long          low_bankwarn = 12000;
 long          low_bankcutoff = 11500;
-int             reportrate = 2;
+long          deltawarn = 100;
+long          deltacutoff = 150;
 
+int             reportrate = 2;
 char msg[75];
 
 struct MQMessage {
   char topic[32];
   char message[32];
 };
+
+struct Button {
+  const uint8_t PIN;
+  unsigned long cancelTimer;
+  bool pressed;
+};
+
+Button cancel_alarm = {CANCELALARM, 0, false};
 
 Adafruit_ADS1115 ads;
 
@@ -171,9 +197,6 @@ TaskHandle_t TaskA, TaskB, TaskC, TaskD , TaskE;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-/*
-   OneWire
-*/
 // Setup a oneWire instance to communicate with any OneWire device
 OneWire oneWire(TEMPSIG1);
 
@@ -206,15 +229,16 @@ void runEachTimer(int oldAlarmStatus)
       void mqttconnect();
     }
   }
-  unsigned long cycle = 0;
-  snprintf (msg, 75, "Begin Cycle %ld", cycle);
-  MQ_Publish("bps/cycle", msg);
+  
+//  unsigned long cycle = 0;
+//  snprintf (msg, 75, "Begin Cycle %ld", cycle);
+//  MQ_Publish("bps/cycle", msg);
 
   myreadvoltage();
 
-  cycle = timervar - millis();
-  snprintf (msg, 75, "Voltage %ld", cycle);
-  MQ_Publish("bps/cycle", msg);
+//  cycle = timervar - millis();
+//  snprintf (msg, 75, "Voltage %ld", cycle);
+//  MQ_Publish("bps/cycle", msg);
 
   int alarmstatus = 0;
 
@@ -223,14 +247,15 @@ void runEachTimer(int oldAlarmStatus)
   DEBUGPRINT3("Final AlarmStatus: ");
   DEBUGPRINTLN3(alarmstatus);
 
-  cycle = timervar - millis();
-  snprintf (msg, 75, "Mid Cycle %ld", cycle);
-  MQ_Publish("bps/cycle", msg);
+//  cycle = timervar - millis();
+//  snprintf (msg, 75, "Mid Cycle %ld", cycle);
+//  MQ_Publish("bps/cycle", msg);
 
   runalarms(alarmstatus, oldAlarmStatus);
-  cycle = timervar - millis();
-  snprintf (msg, 75, "Runalarms %ld", cycle);
-  MQ_Publish("bps/cycle", msg);
+
+//  cycle = timervar - millis();
+//  snprintf (msg, 75, "Runalarms: %ld:  %ld", alarmstatus, cycle);
+//  MQ_Publish("bps/cycle", msg);
   //Publish LED Status
   int answer = 100;
   answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
@@ -241,34 +266,33 @@ void runEachTimer(int oldAlarmStatus)
   snprintf (msg, 75, "%ld", answer);
   MQ_Publish(HVCLED, msg);
 
-  cycle = timervar - millis();
-  snprintf (msg, 75, "End Cycle %ld", cycle);
-  MQ_Publish("bps/cycle", msg);
+//  cycle = timervar - millis();
+//  snprintf (msg, 75, "End Cycle %ld", cycle);
+//  MQ_Publish("bps/cycle", msg);
 
   getTemperatures();
 
   snprintf (msg, 75, "%d", temperatures[0]);
-  MQ_Publish("bps/temp1", msg);
+  MQ_Publish(TEMP1, msg);
   snprintf (msg, 75, "%d", temperatures[1]);
-  MQ_Publish("bps/temp2", msg);
+  MQ_Publish(TEMP2, msg);
 
-updateLed();
-ArduinoOTA.handle();
+  updateLed();
+  ArduinoOTA.handle();
 
 }
 
 void setup()
 {
+  setup_interrupts();
   ADC_Setup();
-
   PinSetup();
-
   OneWireSetup();
 
   ChirpQueue = xQueueCreate( 10, sizeof( int ));
   PrintQueue = xQueueCreate( 10, 32);
   MQ_Queue = xQueueCreate(15, sizeof(struct MQMessage));
-  ChirpSilenceQ = xQueueCreate(5, sizeof( bool ));
+  // ChirpSilenceQ = xQueueCreate(5, sizeof( bool ));
 
   Serial.begin(115200);
   if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
@@ -284,6 +308,7 @@ void setup()
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
       vTaskDelay(500);
+      Serial.print(ssid);
     }
 
     /* configure the MQTT server with IPaddress and port */
@@ -296,6 +321,7 @@ void setup()
     mqttconnect(boot);
     boot = false;
   }
+
 
   OTA_Setup();
 
@@ -346,7 +372,7 @@ void setup()
     tskNO_AFFINITY);//1
 
   vTaskDelay(500);
-
+/*
   xTaskCreatePinnedToCore(
     ChirpSilence,
     "ChirpSilence",
@@ -356,13 +382,13 @@ void setup()
     &TaskE,
     1);//1
   vTaskDelay(500);
-
+*/
   DEBUGPRINTLN3(uxTaskGetNumberOfTasks());
   DEBUGPRINTLN3(eTaskGetState(TaskA));
   DEBUGPRINTLN3(eTaskGetState(TaskB));
   DEBUGPRINTLN3(eTaskGetState(TaskC));
   DEBUGPRINTLN3(eTaskGetState(TaskD));
-  DEBUGPRINTLN3(eTaskGetState(TaskE));
+//  DEBUGPRINTLN3(eTaskGetState(TaskE));
   DEBUGPRINTLN3("SetupCompleted");
 
   updateLed();

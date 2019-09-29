@@ -10,7 +10,6 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
 
   char ntopic[20];
   strcpy (ntopic, topic);
-
   MQ_Publish(STATUS, ntopic);
 
   if (strcmp(ntopic, "LVC") == 0) {
@@ -28,6 +27,19 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
     }
   }
 
+#ifdef TESTING
+  if (strcmp(ntopic, "LVC") == 0)
+  {
+    relays(lowcut);
+  }
+
+  if (strcmp(ntopic, "HVC") == 0)
+  {
+    relays(highcut);
+  }
+
+#endif
+
   if (strcmp(ntopic, "HVC") == 0) {
     int res = readled(LEDPINHVC);
     snprintf (msg, 75, "%ld", res);
@@ -44,6 +56,14 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
       MQ_Publish("outTopic", msg);
     }
   }
+
+  if (strcmp(ntopic, "bps/reboot") == 0) {
+    ESP.restart();
+    //    DEBUGPRINTLN3(Cell[3]);
+    //    DEBUGPRINTLN3();
+    //return;
+  }
+
 #ifdef TESTING
   if (strcmp(ntopic, "bps/testbuzz") == 0) {
     testBuzz(2);
@@ -122,7 +142,7 @@ void mqttconnect(bool boot) {
         MQ_Publish(STATUS, msg);
       }
     } else {
-      vTaskDelay(20);
+      vTaskDelay(10);
     }
   }
 }
