@@ -36,8 +36,6 @@ void myreadvoltage()
 
     for (int j = 0; j < 10; j++) {// Do up to 10 readings
 
-
-
       ADC[i] = ads.readADC_SingleEnded(i);
       ADC[i] = adcFilter(i);
 
@@ -59,27 +57,29 @@ void myreadvoltage()
   ADC[2] = cellAve[2] * 6 * 2048 / 32768 ;
   ADC[3] = cellAve[3] * 8 * 2048 / 32768 ;
 
-  ADC[0] = ADC[0] - 18;
+  ADC[0] = ADC[0]+5 ;
   ADC[1] = ADC[1] + 20;
-  ADC[2] = ADC[2] + 70 ;
-  ADC[3] = ADC[3] + 57;
+  ADC[2] = ADC[2] -4 ;
+  ADC[3] = ADC[3] ;
 
+#ifdef TESTING
   snprintf (msg, 50, " % d", ADC[0] );
-  MQ_Publish("bps/adc0", msg);
+  MQ_Publish( "bps/adc0", msg);
   snprintf (msg, 50, " % d", ADC[1]  );
-  MQ_Publish("bps/adc1", msg);
+  MQ_Publish( "bps/adc1", msg);
   snprintf (msg, 50, " % d", ADC[2]   );
-  MQ_Publish("bps/adc2", msg);
+  MQ_Publish( "bps/adc2", msg);
   snprintf (msg, 50, " % d", ADC[3] );
-  MQ_Publish("bps/adc3", msg);
+  MQ_Publish( "bps/adc3", msg);
+#endif
 
   Cell[0] = ADC[0] ;//- 8 ;
   Cell[1] = ADC[1] - ADC[0]  ;//- 4;
-  Cell[2] = ADC[2] - ADC[1] - 20 ; //- 9;
-  Cell[3] = ADC[3] - ADC[2] + 20 ; //+ 33;
+  Cell[2] = ADC[2] - ADC[1]  ; //- 9;
+  Cell[3] = ADC[3] - ADC[2]  ; //+ 33;
   bank = ADC[3] ;//+ 15;
 
-#ifdef TESTING
+#ifdef TESTINGVOLTAGE
   Cell[0] = testCell[0] ;
   Cell[1] = testCell[1] ;
   Cell[2] = testCell[2] ;
@@ -117,11 +117,11 @@ void myreadvoltage()
   snprintf (msg, 50, " % d", lowcell + 1);
   MQ_Publish(LOCELL, msg);
   snprintf (msg, 50, " % d", cellsum + 1);
-  MQ_Publish("bps/cellsum", msg);
+  MQ_Publish(CELLSUM, msg);
 
-  uptime =  esp_timer_get_time() / 60000000/60;
+  uptime =  esp_timer_get_time() / 3600000000;
   snprintf (msg, 50, " % u", uptime);
-  MQ_Publish("bps/uptime", msg);
+  MQ_Publish(UPTIME, msg);
 }
 /*
   void readvoltage()

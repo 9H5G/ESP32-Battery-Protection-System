@@ -1,15 +1,21 @@
 void Chirp(int number)
 {
+  Serial.println("");
+  Serial.print("cancelTimer");
+  Serial.println(millis() - cancel_alarm.cancelTimer);
+  if (number < 10) {
+    if (millis() > cancel_alarm.cancelTimer ) {
+      for (int i = 0; i < number; i++) {
+        digitalWrite(BUZZERPIN, HIGH);
+        //digitalWrite(LED_BUILTIN, HIGH);
 
-  for (int i = 0; i < number; i++) {
-    digitalWrite(BUZZERPIN, HIGH);
-    digitalWrite(LED_BUILTIN, HIGH);
+        vTaskDelay(50);
 
-    vTaskDelay(100);
-    digitalWrite(BUZZERPIN, LOW);
-    digitalWrite(LED_BUILTIN, LOW);
-    vTaskDelay(100);
-
+        digitalWrite(BUZZERPIN, LOW);
+        //digitalWrite(LED_BUILTIN, LOW);
+        vTaskDelay(100);
+      }
+    }
   }
 }
 
@@ -57,6 +63,7 @@ int calculate_alarms()
     DEBUGPRINTLN3(Cell[3]);
 
   */
+#ifdef TESTING
   DEBUGPRINTLN3();
   DEBUGPRINTLN3("---Calculate Alarms---");
   DEBUGPRINT3("bank: ");
@@ -67,6 +74,7 @@ int calculate_alarms()
   DEBUGPRINTLN3(lowcellv);
   DEBUGPRINT3("Delta: ");
   DEBUGPRINTLN3(delta);
+#endif
 
   if (bank > high_bankwarn) {
     alarmstate = highchirp;
@@ -99,7 +107,7 @@ int calculate_alarms()
     DEBUGPRINT3("deltawarn: ");
     DEBUGPRINTLN3(delta);
   }
-  
+
   if (delta > deltacutoff) {
     DEBUGPRINT3("Delta Cutoff @: ");
     DEBUGPRINTLN3(delta);
@@ -149,23 +157,35 @@ int calculate_alarms()
   xQueueSend(ChirpQueue, &alarmstate, 0);
 
   snprintf (msg, 75, "%d", alarmstate);
-  MQ_Publish("bps/alarm", msg);
+  MQ_Publish(ALARM, msg);
+
+  // check for 'diverging Delta' fault
+  if (delta > deltawarn) {
+    deltaSum = deltaSum + delta;
+    snprintf (msg, 75, "%d", deltaSum);
+    MQ_Publish(DELTASUM, msg);
+  }
+  else
+  {
+    deltaSum = 0;
+  }
+
+  if (deltaSum > 1000) {
+    ESP.restart();
+  }
 
   return alarmstate;
 }
 
 void runalarms(int alarmcode, int oldAlarmCode) {
- 
-  if (alarmcode >= 20)  {
 
-    //Action required
-    //Only do the cutoff if it has not worked
-    if ((alarmcode == lowcut)) { // && (readled(LEDPINLVC) == 0)) {
-      relays(alarmcode);
-    }
-    if ((alarmcode == highcut)) { // && (readled(LEDPINHVC) == 0)) {
-      relays(alarmcode);
-    }
-
+  //Action required
+  //Only do the cutoff if it has not worked
+  if ((alarmcode == lowcut)) { // && (readled(LEDPINLVC) == 0)) {
+    relays(lowcut);
   }
+  if ((alarmcode == highcut)) { // && (readled(LEDPINHVC) == 0)) {
+    relays(highcut);
+  }
+
 }

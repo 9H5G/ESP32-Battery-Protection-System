@@ -16,7 +16,6 @@ void ServiceAlarmQueue(void * parameter) {
   char mymsg[75];
   int currentChirp = 0;
   int  chirpTimer = 0;
-
   for (;;) {
     int element = 0;
     if (millis() > chirpTimer) {
@@ -28,7 +27,7 @@ void ServiceAlarmQueue(void * parameter) {
 
       if (element > currentChirp) {// If its a higher priority alarm reset timer and chirp this alarm
         currentChirp = element;
-        chirpTimer = millis() + 20000;
+        chirpTimer = millis() + 2000;
         snprintf (msg, 75, "CurrentChirp %ld", currentChirp);
         MQ_Publish(STATUS, msg);
       }
@@ -36,7 +35,7 @@ void ServiceAlarmQueue(void * parameter) {
       while ((millis() < chirpTimer)) {
 
         Chirp(currentChirp);
-      
+
         vTaskDelay(2000);
 
         if ( xQueuePeek( ChirpQueue, &element , ( TickType_t ) 10 ) ) {
@@ -50,6 +49,12 @@ void ServiceAlarmQueue(void * parameter) {
           }
         }
       }
+
+    } else {
+#ifdef TESTING
+      snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
+      MQ_Publish(STATUS, msg);
+#endif
 
     }
   }
@@ -118,7 +123,8 @@ void MQTT_Handle(void * parameter) {
   }
 }
 
-void ChirpSilence(void * parameter) {
+/*
+  void ChirpSilence(void * parameter) {
   TickType_t xLastWakeTime;
   const TickType_t xFrequency = 10;
 
@@ -133,4 +139,5 @@ void ChirpSilence(void * parameter) {
 
     // Perform action here.
   }
-}
+  }
+*/

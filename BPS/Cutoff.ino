@@ -1,10 +1,9 @@
 void relays(int mtype)
 {
-  //mtype = alarmcode
-
   int mpin = 0;
 
   if (mtype != 0) {
+    
     if (mtype == highcut) {
       mpin = HVCOFFPIN;
     }
@@ -14,13 +13,18 @@ void relays(int mtype)
     if (mtype == highon) {
       mpin = HVCONPIN;
       //mpin = LED_BUILTIN;
-
     }
     if (mtype == lowon) {
       mpin = LVCONPIN;
     }
-    snprintf (msg, 75, " #%d", mpin);
-    client.publish(CUTOFF, msg);
+    if (mpin == 0)
+    {
+      snprintf (msg, 75, "#%d", mpin);
+    } else {
+      snprintf (msg, 75, "#%d", mpin);
+    }
+
+    MQ_Publish(CUTOFF, msg);
 
     digitalWrite(mpin, HIGH);
     vTaskDelay(pulseLength);
@@ -67,6 +71,7 @@ int readled(int ledpin)
   int res = digitalRead(ledpin);
   return res;
 }
+
 void updateLed()
 {
   int answer = 100;
@@ -101,7 +106,7 @@ void output_Test()
   digitalWrite(LED_BUILTIN, HIGH);
 
   Serial.print("ONNNN");
-  vTaskDelay(500);
+  vTaskDelay(2000);
 
   digitalWrite(LVCONPIN, LOW);
   digitalWrite(LVCOFFPIN, LOW);
