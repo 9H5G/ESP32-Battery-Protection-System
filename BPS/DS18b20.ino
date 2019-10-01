@@ -1,4 +1,4 @@
-void OneWireSetup(){
+void OneWireSetup() {
   sensors.begin();  // Start up the library
   Serial.begin(9600);
 
@@ -6,10 +6,10 @@ void OneWireSetup(){
   Serial.print("Locating devices...");
   Serial.print("Found ");
   deviceCount = sensors.getDeviceCount();
-/*  Serial.print(deviceCount, DEC);
-  Serial.println(" devices.");
-  Serial.println("");
-*/
+  /*  Serial.print(deviceCount, DEC);
+    Serial.println(" devices.");
+    Serial.println("");
+  */
 }
 
 void getTemperatures() {
@@ -35,5 +35,26 @@ void getTemperatures() {
     */
   }
 
-//  Serial.println("");
+  //  Serial.println("");
+}
+
+void runTemperatureAlarm()
+{
+  for (int i = 0 ; i < deviceCount; i++) {
+    if (temperatures[i] > tooHot)
+    {
+      relays(lowcut);
+      relays(highcut);
+    }
+    
+    if (temperatures[i] < 0)//Inhibit charging
+    {
+      relays(highcut);
+    }
+
+      if (temperatures[i] > tempWarn)
+    {
+xQueueSend(ChirpQueue, &tempWarn, 0);
+    }
+  }
 }
