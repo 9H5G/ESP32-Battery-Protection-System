@@ -17,6 +17,11 @@ void Chirp(int number)
       }
     }
   }
+  if(number ==tempWarn){// 'T' for temperature
+     digitalWrite(BUZZERPIN, HIGH);
+        vTaskDelay(300);
+        digitalWrite(BUZZERPIN, LOW);
+  }
 }
 
 int calculate_alarms()

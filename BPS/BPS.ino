@@ -1,6 +1,6 @@
 #define DEBUGLEVEL 3
 #include <DebugUtils.h>
-
+#include "credentials.h"
 const long vers = 324500;
 
 #include <Wire.h>
@@ -53,6 +53,10 @@ int lowchirp = 1;
 int chirp = 2;
 int highchirp = 3;
 
+//Temperature warnings
+int tempWarn = 40; //High temperature warning if T>40
+int tooHot = 50;
+
 /*
    Pins
 */
@@ -100,14 +104,15 @@ const int JTAG4 = 15;
 
 const int CANCELALARM = 13;
 /*
- * Copy to credentials.ino and fill in your details
-const char* ssid = "";
-const char* password = "";
-const char* Host = "";
-const char* MQ_client = "";       // your MQTT Client ID
-const char* MQ_user = "";//"mosquitto";       // your MQTT password
-const char* MQ_pass = "";       // your network password
-const char* mqtt_server = "192.168.0.4";
+   Copy to credentials.ino and fill in your details
+
+  const char* ssid = "";
+  const char* password = "";
+  const char* Host = "";
+  const char* MQ_client = "";       // your MQTT Client ID
+  const char* MQ_user = "";//"mosquitto";       // your MQTT password
+  const char* MQ_pass = "";       // your network password
+  const char* mqtt_server = "192.168.0.4";
 */
 
 const bool  wifi = true;
@@ -229,34 +234,19 @@ void runEachTimer(int oldAlarmStatus)
       void mqttconnect();
     }
   }
-  
-//  unsigned long cycle = 0;
-//  snprintf (msg, 75, "Begin Cycle %ld", cycle);
-//  MQ_Publish("bps/cycle", msg);
 
   myreadvoltage();
-
-//  cycle = timervar - millis();
-//  snprintf (msg, 75, "Voltage %ld", cycle);
-//  MQ_Publish("bps/cycle", msg);
 
   int alarmstatus = 0;
 
   alarmstatus = (int) calculate_alarms();
+  
   oldAlarmStatus = alarmstatus;
   DEBUGPRINT3("Final AlarmStatus: ");
   DEBUGPRINTLN3(alarmstatus);
 
-//  cycle = timervar - millis();
-//  snprintf (msg, 75, "Mid Cycle %ld", cycle);
-//  MQ_Publish("bps/cycle", msg);
-
   runalarms(alarmstatus, oldAlarmStatus);
 
-//  cycle = timervar - millis();
-//  snprintf (msg, 75, "Runalarms: %ld:  %ld", alarmstatus, cycle);
-//  MQ_Publish("bps/cycle", msg);
-  //Publish LED Status
   int answer = 100;
   answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
   snprintf (msg, 75, "%ld", answer);
@@ -266,11 +256,8 @@ void runEachTimer(int oldAlarmStatus)
   snprintf (msg, 75, "%ld", answer);
   MQ_Publish(HVCLED, msg);
 
-//  cycle = timervar - millis();
-//  snprintf (msg, 75, "End Cycle %ld", cycle);
-//  MQ_Publish("bps/cycle", msg);
-
   getTemperatures();
+  runTemperatureAlarm();
 
   snprintf (msg, 75, "%d", temperatures[0]);
   MQ_Publish(TEMP1, msg);
@@ -372,23 +359,23 @@ void setup()
     tskNO_AFFINITY);//1
 
   vTaskDelay(500);
-/*
-  xTaskCreatePinnedToCore(
-    ChirpSilence,
-    "ChirpSilence",
-    8192,
-    NULL,
-    6,
-    &TaskE,
-    1);//1
-  vTaskDelay(500);
-*/
+  /*
+    xTaskCreatePinnedToCore(
+      ChirpSilence,
+      "ChirpSilence",
+      8192,
+      NULL,
+      6,
+      &TaskE,
+      1);//1
+    vTaskDelay(500);
+  */
   DEBUGPRINTLN3(uxTaskGetNumberOfTasks());
   DEBUGPRINTLN3(eTaskGetState(TaskA));
   DEBUGPRINTLN3(eTaskGetState(TaskB));
   DEBUGPRINTLN3(eTaskGetState(TaskC));
   DEBUGPRINTLN3(eTaskGetState(TaskD));
-//  DEBUGPRINTLN3(eTaskGetState(TaskE));
+  //  DEBUGPRINTLN3(eTaskGetState(TaskE));
   DEBUGPRINTLN3("SetupCompleted");
 
   updateLed();
