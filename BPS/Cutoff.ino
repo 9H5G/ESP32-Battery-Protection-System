@@ -1,9 +1,15 @@
+int readled(int ledpin)
+{
+  int res = digitalRead(ledpin);
+  return res;
+}
+
 void relays(int mtype)
 {
   int mpin = 0;
 
   if (mtype != 0) {
-    
+
     if (mtype == highcut) {
       mpin = HVCOFFPIN;
     }
@@ -22,100 +28,95 @@ void relays(int mtype)
       snprintf (msg, 75, "#%d", mpin);
     } else {
       snprintf (msg, 75, "#%d", mpin);
+
+
+      MQ_Publish(CUTOFF, msg);
+
+      digitalWrite(mpin, HIGH);
+      if (pulseLength > 0) {
+        vTaskDelay(pulseLength);
+        digitalWrite(mpin, LOW);
+      }
+      DEBUGPRINT3("--- Switch --- ");
+      DEBUGPRINTLN3(mpin);
+      //Switch_GPIO(GPIO1,mtype);
+      //Switch_GPIO(GPIO2,mtype);
+
     }
+    /*
+       Update relay status on dashboard
+    */
 
-    MQ_Publish(CUTOFF, msg);
+    int answer = 100;
 
-    digitalWrite(mpin, HIGH);
-    vTaskDelay(pulseLength);
-    digitalWrite(mpin, LOW);
+    snprintf (msg, 75, "%ld", LEDPINHVC);
+    MQ_Publish("ReadLEDHVC", msg);
 
-    DEBUGPRINT3("--- Switch --- ");
-    DEBUGPRINTLN3(mpin);
-    //Switch_GPIO(GPIO1,mtype);
-    //Switch_GPIO(GPIO2,mtype);
+    snprintf (msg, 75, "%ld", answer);
+    MQ_Publish("ReadLEDResult", msg);
+
+    answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
+    snprintf (msg, 75, "%ld", answer);
+    MQ_Publish(HVCLED, msg);
+
+    answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
+    snprintf (msg, 75, "%ld", answer);
+    MQ_Publish(LVCLED, msg);
+
+    answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
+    snprintf (msg, 75, "%ld", LEDPINLVC);
+    MQ_Publish("ReadLEDLVC", msg);
+
+    answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
+    snprintf (msg, 75, "%ld", answer);
+    MQ_Publish("ReadLEDResult", msg);
 
   }
-  /*
-     Update relay status on dashboard
-  */
-
-  int answer = 100;
-
-  snprintf (msg, 75, "%ld", LEDPINHVC);
-  MQ_Publish("ReadLEDHVC", msg);
-
-  snprintf (msg, 75, "%ld", answer);
-  MQ_Publish("ReadLEDResult", msg);
-
-  answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
-  MQ_Publish(HVCLED, msg);
-
-  answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
-  MQ_Publish(LVCLED, msg);
-
-  answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", LEDPINLVC);
-  MQ_Publish("ReadLEDLVC", msg);
-
-  answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
-  MQ_Publish("ReadLEDResult", msg);
-
 }
+  void updateLed()
+  {
+    int answer = 100;
+    answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
+    snprintf (msg, 75, "%ld", answer);
+    MQ_Publish("HVCled", msg);
 
-int readled(int ledpin)
-{
-  int res = digitalRead(ledpin);
-  return res;
-}
+    answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
+    snprintf (msg, 75, "%ld", answer);
+    MQ_Publish("LVCled", msg);
+  }
 
-void updateLed()
-{
-  int answer = 100;
-  answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
-  MQ_Publish("HVCled", msg);
+  void output_Test()
+  {
 
-  answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
-  MQ_Publish("LVCled", msg);
-}
+    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(HVCOFFPIN, OUTPUT);
+    pinMode(HVCONPIN, OUTPUT);
+    pinMode(LVCONPIN, OUTPUT);
+    pinMode(LVCOFFPIN, OUTPUT);
+    pinMode(BUZZERPIN, OUTPUT);
+    pinMode(GPIO1, OUTPUT);
+    pinMode(GPIO2, OUTPUT);
 
-void output_Test()
-{
+    digitalWrite(LVCONPIN, HIGH);
+    digitalWrite(LVCOFFPIN, HIGH);
+    digitalWrite(HVCOFFPIN, HIGH);
+    digitalWrite(HVCONPIN, HIGH);
+    digitalWrite(GPIO1, HIGH);
+    digitalWrite(GPIO2, HIGH);
+    digitalWrite(BUZZERPIN, HIGH);
+    digitalWrite(LED_BUILTIN, HIGH);
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(HVCOFFPIN, OUTPUT);
-  pinMode(HVCONPIN, OUTPUT);
-  pinMode(LVCONPIN, OUTPUT);
-  pinMode(LVCOFFPIN, OUTPUT);
-  pinMode(BUZZERPIN, OUTPUT);
-  pinMode(GPIO1, OUTPUT);
-  pinMode(GPIO2, OUTPUT);
+    Serial.print("ONNNN");
+    vTaskDelay(2000);
 
-  digitalWrite(LVCONPIN, HIGH);
-  digitalWrite(LVCOFFPIN, HIGH);
-  digitalWrite(HVCOFFPIN, HIGH);
-  digitalWrite(HVCONPIN, HIGH);
-  digitalWrite(GPIO1, HIGH);
-  digitalWrite(GPIO2, HIGH);
-  digitalWrite(BUZZERPIN, HIGH);
-  digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LVCONPIN, LOW);
+    digitalWrite(LVCOFFPIN, LOW);
+    digitalWrite(HVCOFFPIN, LOW);
+    digitalWrite(HVCONPIN, LOW);
+    digitalWrite(GPIO1, LOW);
+    digitalWrite(GPIO2, LOW);
+    digitalWrite(BUZZERPIN, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
 
-  Serial.print("ONNNN");
-  vTaskDelay(2000);
-
-  digitalWrite(LVCONPIN, LOW);
-  digitalWrite(LVCOFFPIN, LOW);
-  digitalWrite(HVCOFFPIN, LOW);
-  digitalWrite(HVCONPIN, LOW);
-  digitalWrite(GPIO1, LOW);
-  digitalWrite(GPIO2, LOW);
-  digitalWrite(BUZZERPIN, LOW);
-  digitalWrite(LED_BUILTIN, LOW);
-
-  Serial.print("OFFFF");
-}
+    Serial.print("OFFFF");
+  }

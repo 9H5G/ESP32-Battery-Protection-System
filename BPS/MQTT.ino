@@ -100,13 +100,6 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
     //return;
   }
 
-  if (strcmp(ntopic, "test2/reboot") == 0) {
-    ESP.restart();
-    //    DEBUGPRINTLN3(Cell[3]);
-    //    DEBUGPRINTLN3();
-    //return;
-  }
-
   //outputTest
   if (strcmp(ntopic, "test2/outputTest") == 0) {
     output_Test();
@@ -123,7 +116,6 @@ void mqttconnect(bool boot) {
 
     if (client.connect(Host, MQ_user, MQ_pass)) {
       vTaskDelay(2);
-
       client.subscribe("LVC");
       client.subscribe("HVC");
 #ifdef TESTING
@@ -132,9 +124,9 @@ void mqttconnect(bool boot) {
       client.subscribe("test2/cell3");
       client.subscribe("test2/cell4");
       client.subscribe("test2/outputTest");
-
       client.subscribe("bps/testbuzz");
 #endif
+
       if (boot) {
         snprintf (msg, 75, "Boot: %ld", vers);
         MQ_Publish(STATUS, msg);
@@ -142,7 +134,7 @@ void mqttconnect(bool boot) {
         MQ_Publish(STATUS, msg);
       }
     } else {
-      vTaskDelay(10);
+      vTaskDelay(2);
     }
   }
 }
