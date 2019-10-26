@@ -1,7 +1,7 @@
 #define DEBUGLEVEL 3
 #include <DebugUtils.h>
 #include "credentials.h"
-const long vers = 32600;
+const long vers = 32601;
 
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>

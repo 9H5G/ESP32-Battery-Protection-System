@@ -1,4 +1,7 @@
-
+/*
+ * Rename this file credential.h
+ * and edit to suit your circumstances
+ */
 const char* ssid = "";             //Wifi network SSID
 const char* password = "";         // Password
 const char* Host = "BPS32";
