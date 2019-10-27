@@ -1,5 +1,5 @@
 /*
- * Rename this file credential.h
+ * Rename this file credentials.h
  * and edit to suit your circumstances
  */
 const char* ssid = "";             //Wifi network SSID
