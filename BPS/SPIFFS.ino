@@ -1,4 +1,3 @@
-
 void SPIFFSSetup(){
     if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
     DEBUGPRINTLN3("Failed to mount file system");
