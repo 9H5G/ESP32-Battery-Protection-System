@@ -1,4 +1,9 @@
-const char* ssid = "agboat";
+/*
+ * 
+ * 
+ */
+ 
+ const char* ssid = "agboat";
 const char* password = "jram7757";
 const char* Host = "BPS32";
 const char* MQ_client = "BPStest";       // your MQTT Client ID
