@@ -3,6 +3,7 @@
 #include "credentials.h"
 const long vers = 32601;
 
+#include <WiFi.h>
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 #include <ArduinoOTA.h>
@@ -40,7 +41,7 @@ int inc = 1;
 
 long runcounter = 0;
 
-bool defaultsettings = false;
+bool defaultsettings = true;
 bool outputTest = false;
 unsigned long uptime;
 int pulseLength = 250;
@@ -216,31 +217,29 @@ void runEachTimer(int oldAlarmStatus)
 {
   timervar = millis() + (reportrate * 1000);
 
-  if (wifi) {
-    int count = 0;
+  int count = 0;
 
-    while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED) {
 
-      vTaskDelay(500);
-      count++;
-      DEBUGPRINT3("+");
-      WiFi.begin(ssid, password);
-      if (count > 20) {
-        ESP.restart();
-      }
-    }
-
-    if (!client.connected()) {
-      void mqttconnect();
+    vTaskDelay(500);
+    count++;
+    DEBUGPRINT3("+");
+    WiFi.begin(ssid, password);
+    if (count > 20) {
+      ESP.restart();
     }
   }
 
-  myreadvoltage();
+  if (!client.connected()) {
+    void mqttconnect();
+  }
+
+   myreadvoltage();
 
   int alarmstatus = 0;
 
   alarmstatus = (int) calculate_alarms();
-  
+
   oldAlarmStatus = alarmstatus;
   DEBUGPRINT3("Final AlarmStatus: ");
   DEBUGPRINTLN3(alarmstatus);
@@ -289,43 +288,32 @@ void setup()
 
   loadConfig();
 
-  if (wifi) {
-    WiFi.mode(WIFI_STA);
-    WiFi.setHostname(Host);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-      vTaskDelay(500);
-      Serial.print(ssid);
-    }
-
-    /* configure the MQTT server with IPaddress and port */
-    DEBUGPRINTLN3(mqtt_server);
-
-    client.setServer(mqtt_server, 1883);
-    /* this receivedCallback function will be invoked
-      when client received subscribed topic */
-    client.setCallback(receivedCallback);
-    mqttconnect(boot);
-    boot = false;
+  WiFi.mode(WIFI_STA);
+  WiFi.setHostname(Host);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    vTaskDelay(500);
+    Serial.print("S+");
   }
 
+  /* configure the MQTT server with IPaddress and port */
+  /*DEBUGPRINTLN3(mqtt_server);
+  */
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(receivedCallback);
+  mqttconnect(boot);
 
   OTA_Setup();
 
-
-  if (wifi) {
-
-    xTaskCreatePinnedToCore(
-      MQTT_Handle,
-      "MQTT_Task",
-      8192,
-      NULL,
-      5,
-      &TaskD,
-      tskNO_AFFINITY);//0
-    vTaskDelay(500);
-
-  }
+  xTaskCreatePinnedToCore(
+    MQTT_Handle,
+    "MQTT_Task",
+    8192,
+    NULL,
+    5,
+    &TaskD,
+    tskNO_AFFINITY);//0
+  vTaskDelay(500);
 
   xTaskCreatePinnedToCore(
     Task1,
@@ -348,8 +336,8 @@ void setup()
     tskNO_AFFINITY);//1
 
   vTaskDelay(500);
-
-  xTaskCreatePinnedToCore(
+  /*
+    xTaskCreatePinnedToCore(
     SerialPrintTask,
     "PrintTask",
     8192,
@@ -358,29 +346,30 @@ void setup()
     &TaskC,
     tskNO_AFFINITY);//1
 
-  vTaskDelay(500);
-  /*
-    xTaskCreatePinnedToCore(
-      ChirpSilence,
-      "ChirpSilence",
-      8192,
-      NULL,
-      6,
-      &TaskE,
-      1);//1
     vTaskDelay(500);
   */
-  DEBUGPRINTLN3(uxTaskGetNumberOfTasks());
-  DEBUGPRINTLN3(eTaskGetState(TaskA));
-  DEBUGPRINTLN3(eTaskGetState(TaskB));
-  DEBUGPRINTLN3(eTaskGetState(TaskC));
-  DEBUGPRINTLN3(eTaskGetState(TaskD));
-  //  DEBUGPRINTLN3(eTaskGetState(TaskE));
-  DEBUGPRINTLN3("SetupCompleted");
+  /*
+    xTaskCreatePinnedToCore(
+     ChirpSilence,
+     "ChirpSilence",
+     8192,
+     NULL,
+     6,
+     &TaskE,
+     1);//1
+    vTaskDelay(500);
 
-  updateLed();
-  rebootBuzz();
+    DEBUGPRINTLN3(uxTaskGetNumberOfTasks());
+    DEBUGPRINTLN3(eTaskGetState(TaskA));
+    DEBUGPRINTLN3(eTaskGetState(TaskB));
+    //DEBUGPRINTLN3(eTaskGetState(TaskC));
+    DEBUGPRINTLN3(eTaskGetState(TaskD));
+    //DEBUGPRINTLN3(eTaskGetState(TaskE));
+    DEBUGPRINTLN3("SetupCompleted");
 
+    updateLed();
+    rebootBuzz();
+  */
 }
 
 void loop(void)

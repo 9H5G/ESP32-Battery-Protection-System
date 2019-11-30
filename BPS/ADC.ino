@@ -6,21 +6,24 @@ void ADC_Setup() {
 int32_t adcFilter(int adc) {
   int32_t reading = 0;
   int32_t result = 0;
+  bool valid = false;
 
-  //If reading out of range, dump it
-  for (int j = 0; j < 5 ; j++)     {
+  /*
+      If reading out of range, dump it
+  */
+  while (valid == false) {
     reading = ads.readADC_SingleEnded(adc);
 
-    if ((reading > 65534) ) {
-      reading = 0;
-      //j--;
-    }
-    else
-    {
+    snprintf (msg, 50, " % d", reading);
+    MQ_Publish("bps/filter", msg);
+
+    if (reading < 65534) {
+      valid = true;
       result = result + reading;
     }
+    vTaskDelay(10);
   }
-  return result / 5;
+  return result ;
 }
 
 void myreadvoltage()
@@ -37,8 +40,8 @@ void myreadvoltage()
     for (int j = 0; j < 10; j++) {// Do up to 10 readings
 
       ADC[i] = ads.readADC_SingleEnded(i);
-      ADC[i] = adcFilter(i);
-
+      // ADC[i] = adcFilter(i);
+      //Serial.println(ADC[i]);
       cellAve[i] = (cellAve[i] * 2 / 3) + (ADC[i] / 3);
 
       if (abs( cellAve[i] - ADC[i]) < 4) {
@@ -57,10 +60,10 @@ void myreadvoltage()
   ADC[2] = cellAve[2] * 6 * 2048 / 32768 ;
   ADC[3] = cellAve[3] * 8 * 2048 / 32768 ;
 
-  ADC[0] = ADC[0]+5 ;
-  ADC[1] = ADC[1] + 20;
-  ADC[2] = ADC[2] -4 ;
-  ADC[3] = ADC[3] ;
+  ADC[0] = ADC[0] + 27;
+  ADC[1] = ADC[1] + 60;
+  ADC[2] = ADC[2] + 57;
+  ADC[3] = ADC[3] + 70;
 
 #ifdef TESTING
   snprintf (msg, 50, " % d", ADC[0] );
@@ -94,35 +97,39 @@ void myreadvoltage()
   lowcellv = Cell[lowcell];
   delta = highcellv - lowcellv;
 
-  snprintf (msg, 50, " % d", Cell[0]);
-  MQ_Publish(CELL1, msg);
-  Serial.println(msg);
-  snprintf (msg, 50, " % d", Cell[1]);
-  MQ_Publish(CELL2, msg);
-  Serial.println(msg);
-  snprintf (msg, 50, " % d", Cell[2]);
-  MQ_Publish(CELL3, msg);
-  Serial.println(msg);
-  snprintf (msg, 50, " % d", Cell[3]);
-  MQ_Publish(CELL4, msg);
-  Serial.println(msg);
+  if (millis() > 10000) {
+    snprintf (msg, 50, " % d", Cell[0]);
+    MQ_Publish(CELL1, msg);
+    Serial.println(msg);
+    snprintf (msg, 50, " % d", Cell[1]);
+    MQ_Publish(CELL2, msg);
+    Serial.println(msg);
+    snprintf (msg, 50, " % d", Cell[2]);
+    MQ_Publish(CELL3, msg);
+    Serial.println(msg);
+    snprintf (msg, 50, " % d", Cell[3]);
+    MQ_Publish(CELL4, msg);
+    Serial.println(msg);
 
-  snprintf (msg, 50, " % d", bank);
-  MQ_Publish(BANK, msg);
-  Serial.println(msg);
-  snprintf (msg, 50, " % d", delta);
-  MQ_Publish(DELTA, msg);
-  snprintf (msg, 50, " % d", highcell + 1);
-  MQ_Publish(HICELL, msg);
-  snprintf (msg, 50, " % d", lowcell + 1);
-  MQ_Publish(LOCELL, msg);
-  snprintf (msg, 50, " % d", cellsum + 1);
-  MQ_Publish(CELLSUM, msg);
-
+    snprintf (msg, 50, " % d", bank);
+    MQ_Publish(BANK, msg);
+    Serial.println(msg);
+    snprintf (msg, 50, " % d", delta);
+    MQ_Publish(DELTA, msg);
+    snprintf (msg, 50, " % d", highcell + 1);
+    MQ_Publish(HICELL, msg);
+    snprintf (msg, 50, " % d", lowcell + 1);
+    MQ_Publish(LOCELL, msg);
+    snprintf (msg, 50, " % d", cellsum + 1);
+    MQ_Publish(CELLSUM, msg);
+  }
+  
   uptime =  esp_timer_get_time() / 3600000000;
   snprintf (msg, 50, " % u", uptime);
   MQ_Publish(UPTIME, msg);
+  
 }
+
 /*
   void readvoltage()
   {
