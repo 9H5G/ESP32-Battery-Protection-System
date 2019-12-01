@@ -1,6 +1,8 @@
 int readled(int ledpin)
 {
   int res = digitalRead(ledpin);
+  //snprintf (msg, 75, "LED %ld, %ld", ledpin, res);
+ // MQ_Publish("bps/outTopic", msg);
   return res;
 }
 
@@ -18,24 +20,25 @@ void relays(int mtype)
     }
     if (mtype == highon) {
       mpin = HVCONPIN;
-      //mpin = LED_BUILTIN;
     }
     if (mtype == lowon) {
       mpin = LVCONPIN;
     }
     if (mpin == 0)
     {
-      snprintf (msg, 75, "#%d", mpin);
+      snprintf (msg, 75, "Zero Pin %d", mpin);
+      MQ_Publish(CUTOFF, msg);
+
     } else {
-      snprintf (msg, 75, "#%d", mpin);
-
-
+      snprintf (msg, 75, "Relays #%d", mpin);
       MQ_Publish(CUTOFF, msg);
 
       digitalWrite(mpin, HIGH);
       if (pulseLength > 0) {
         vTaskDelay(pulseLength);
         digitalWrite(mpin, LOW);
+        snprintf (msg, 75, "Relays %i :#%d", mpin, LOW);
+        MQ_Publish(CUTOFF , msg);
       }
       DEBUGPRINT3("--- Switch --- ");
       DEBUGPRINTLN3(mpin);
@@ -73,50 +76,50 @@ void relays(int mtype)
 
   }
 }
-  void updateLed()
-  {
-    int answer = 100;
-    answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
-    snprintf (msg, 75, "%ld", answer);
-    MQ_Publish("HVCled", msg);
+void updateLed()
+{
+  int answer = 100;
+  answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
+  snprintf (msg, 75, "%ld", answer);
+  MQ_Publish("HVCled", msg);
 
-    answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-    snprintf (msg, 75, "%ld", answer);
-    MQ_Publish("LVCled", msg);
-  }
+  answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
+  snprintf (msg, 75, "%ld", answer);
+  MQ_Publish("LVCled", msg);
+}
 
-  void output_Test()
-  {
+void output_Test()
+{
 
-    pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(HVCOFFPIN, OUTPUT);
-    pinMode(HVCONPIN, OUTPUT);
-    pinMode(LVCONPIN, OUTPUT);
-    pinMode(LVCOFFPIN, OUTPUT);
-    pinMode(BUZZERPIN, OUTPUT);
-    pinMode(GPIO1, OUTPUT);
-    pinMode(GPIO2, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(HVCOFFPIN, OUTPUT);
+  pinMode(HVCONPIN, OUTPUT);
+  pinMode(LVCONPIN, OUTPUT);
+  pinMode(LVCOFFPIN, OUTPUT);
+  pinMode(BUZZERPIN, OUTPUT);
+  pinMode(GPIO1, OUTPUT);
+  pinMode(GPIO2, OUTPUT);
 
-    digitalWrite(LVCONPIN, HIGH);
-    digitalWrite(LVCOFFPIN, HIGH);
-    digitalWrite(HVCOFFPIN, HIGH);
-    digitalWrite(HVCONPIN, HIGH);
-    digitalWrite(GPIO1, HIGH);
-    digitalWrite(GPIO2, HIGH);
-    digitalWrite(BUZZERPIN, HIGH);
-    digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LVCONPIN, HIGH);
+  digitalWrite(LVCOFFPIN, HIGH);
+  digitalWrite(HVCOFFPIN, HIGH);
+  digitalWrite(HVCONPIN, HIGH);
+  digitalWrite(GPIO1, HIGH);
+  digitalWrite(GPIO2, HIGH);
+  digitalWrite(BUZZERPIN, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH);
 
-    Serial.print("ONNNN");
-    vTaskDelay(2000);
+  Serial.print("ONNNN");
+  vTaskDelay(2000);
 
-    digitalWrite(LVCONPIN, LOW);
-    digitalWrite(LVCOFFPIN, LOW);
-    digitalWrite(HVCOFFPIN, LOW);
-    digitalWrite(HVCONPIN, LOW);
-    digitalWrite(GPIO1, LOW);
-    digitalWrite(GPIO2, LOW);
-    digitalWrite(BUZZERPIN, LOW);
-    digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LVCONPIN, LOW);
+  digitalWrite(LVCOFFPIN, LOW);
+  digitalWrite(HVCOFFPIN, LOW);
+  digitalWrite(HVCONPIN, LOW);
+  digitalWrite(GPIO1, LOW);
+  digitalWrite(GPIO2, LOW);
+  digitalWrite(BUZZERPIN, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 
-    Serial.print("OFFFF");
-  }
+  Serial.print("OFFFF");
+}

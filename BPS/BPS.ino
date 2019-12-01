@@ -44,7 +44,7 @@ long runcounter = 0;
 bool defaultsettings = true;
 bool outputTest = false;
 unsigned long uptime;
-int pulseLength = 250;
+int pulseLength = 1000;
 
 /*
    Alarmcodes
@@ -74,8 +74,8 @@ const int LVCOFFPIN = 5;
 const int LEDPINLVC = 26;
 const int LEDPINHVC = 25;
 
-const int HVCOFFPIN = 16;
-const int HVCONPIN = 4;
+const int HVCOFFPIN = 4;
+const int HVCONPIN = 16;
 
 //const int mySCL = 22;
 //const int mySDA = 21;
@@ -234,7 +234,7 @@ void runEachTimer(int oldAlarmStatus)
     void mqttconnect();
   }
 
-   myreadvoltage();
+  myreadvoltage();
 
   int alarmstatus = 0;
 
@@ -288,9 +288,12 @@ void setup()
 
   loadConfig();
 
+  WiFi.disconnect();
   WiFi.mode(WIFI_STA);
   WiFi.setHostname(Host);
+
   WiFi.begin(ssid, password);
+
   while (WiFi.status() != WL_CONNECTED) {
     vTaskDelay(500);
     Serial.print("S+");

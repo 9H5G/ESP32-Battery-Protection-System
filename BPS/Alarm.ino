@@ -17,10 +17,10 @@ void Chirp(int number)
       }
     }
   }
-  if(number ==tempWarn){// 'T' for temperature
-     digitalWrite(BUZZERPIN, HIGH);
-        vTaskDelay(300);
-        digitalWrite(BUZZERPIN, LOW);
+  if (number == tempWarn) { // 'T' for temperature
+    digitalWrite(BUZZERPIN, HIGH);
+    vTaskDelay(300);
+    digitalWrite(BUZZERPIN, LOW);
   }
 }
 
@@ -187,10 +187,10 @@ void runalarms(int alarmcode, int oldAlarmCode) {
   //Action required
   //Only do the cutoff if it has not worked
   if ((alarmcode == lowcut)) { // && (readled(LEDPINLVC) == 0)) {
-    relays(lowcut);
+    // relays(lowcut);
   }
   if ((alarmcode == highcut)) { // && (readled(LEDPINHVC) == 0)) {
-    relays(highcut);
+    //relays(highcut);
   }
 
 }

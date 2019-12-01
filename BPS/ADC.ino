@@ -14,14 +14,10 @@ int32_t adcFilter(int adc) {
   while (valid == false) {
     reading = ads.readADC_SingleEnded(adc);
 
-    snprintf (msg, 50, " % d", reading);
-    MQ_Publish("bps/filter", msg);
-
     if (reading < 65534) {
       valid = true;
       result = result + reading;
     }
-    vTaskDelay(10);
   }
   return result ;
 }
@@ -31,24 +27,22 @@ void myreadvoltage()
   uint16_t adc0 = 0, adc1 = 0, adc2 = 0, adc3 = 0;
   uint16_t ADC[] = {0, 0, 0, 0};
   char mymsg[50];
+  int iterations = 5;
 
   for (int i = 0; i < 4 ; i++) {// For each cell
 
     ADC[i] = ads.readADC_SingleEnded(i);// Read each cell to get rid of previous value
-    ADC[i] = adcFilter(i);
 
-    for (int j = 0; j < 10; j++) {// Do up to 10 readings
+    for (int j = 0; j < iterations; j++) {// Do up to x readings
 
-      ADC[i] = ads.readADC_SingleEnded(i);
-      // ADC[i] = adcFilter(i);
-      //Serial.println(ADC[i]);
+      ADC[i] = adcFilter(i);
       cellAve[i] = (cellAve[i] * 2 / 3) + (ADC[i] / 3);
 
       if (abs( cellAve[i] - ADC[i]) < 4) {
-        j = 10 ;
+        j = iterations ;
       }
 
-      vTaskDelay(10);
+    //  vTaskDelay(5);
     }
 
   }
@@ -123,11 +117,11 @@ void myreadvoltage()
     snprintf (msg, 50, " % d", cellsum + 1);
     MQ_Publish(CELLSUM, msg);
   }
-  
+
   uptime =  esp_timer_get_time() / 3600000000;
   snprintf (msg, 50, " % u", uptime);
   MQ_Publish(UPTIME, msg);
-  
+
 }
 
 /*
