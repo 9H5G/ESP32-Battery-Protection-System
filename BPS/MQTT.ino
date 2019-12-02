@@ -105,6 +105,8 @@ void mqttconnect(bool boot) {
       vTaskDelay(2);
       client.subscribe("LVC");
       client.subscribe("HVC");
+    //  client.subscribe("bps/reboot");
+
 #ifdef TESTING
       client.subscribe("test2/cell1");
       client.subscribe("test2/cell2");
