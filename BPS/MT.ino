@@ -42,8 +42,9 @@ void ServiceAlarmQueue(void * parameter) {
           if (element != currentChirp) {
             chirpTimer = 0; //bail from the loop and get the next message
             currentChirp = 0;
-            snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
+           /* snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
             MQ_Publish(STATUS, msg);
+          */
           } else {
             xQueueReceive (ChirpQueue, &element,  ( TickType_t ) 10 );// Get it out of the queue if its the same
           }
@@ -51,11 +52,11 @@ void ServiceAlarmQueue(void * parameter) {
       }
 
     } else {
-#ifdef TESTING
+/*#ifdef TESTING
       snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
       MQ_Publish(STATUS, msg);
 #endif
-
+*/
     }
   }
 }

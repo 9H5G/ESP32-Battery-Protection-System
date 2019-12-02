@@ -19,26 +19,13 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
       //its ON - switch off
       relays(lowcut);
       snprintf (msg, 75, "Manual: %s", "LVC");
-      MQ_Publish("outTopic", msg);
+      MQ_Publish("bps/outTopic", msg);
     } else {
       relays(lowon);
       snprintf (msg, 75, "Manual: %s", "LVCon");
-      MQ_Publish("outTopic", msg);
+      MQ_Publish("bps/outTopic", msg);
     }
   }
-
-#ifdef TESTING
-  if (strcmp(ntopic, "LVC") == 0)
-  {
-    relays(lowcut);
-  }
-
-  if (strcmp(ntopic, "HVC") == 0)
-  {
-    relays(highcut);
-  }
-
-#endif
 
   if (strcmp(ntopic, "HVC") == 0) {
     int res = readled(LEDPINHVC);
@@ -118,6 +105,8 @@ void mqttconnect(bool boot) {
       vTaskDelay(2);
       client.subscribe("LVC");
       client.subscribe("HVC");
+    //  client.subscribe("bps/reboot");
+
 #ifdef TESTING
       client.subscribe("test2/cell1");
       client.subscribe("test2/cell2");
