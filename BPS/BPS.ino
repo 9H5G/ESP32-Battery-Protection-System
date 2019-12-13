@@ -35,7 +35,7 @@ const long vers = 32601;
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
-#define  TESTING 1
+//#define  TESTING 1
 
 int inc = 1;
 
@@ -86,7 +86,7 @@ const int GPIO1 = 19;
 const int TEMPSIG1 = 23;
 const int TEMPSIG2 = 27;
 
-const int BUZZERPIN = 19;
+const int BUZZERPIN = 32;
 
 const int TOUCH1 = 31;
 const int TOUCH2 = 30;
@@ -217,24 +217,26 @@ void runEachTimer(int oldAlarmStatus)
 {
   timervar = millis() + (reportrate * 1000);
 
-  int count = 0;
+  /*
+       int count = 0;
+    while (WiFi.status() != WL_CONNECTED) {
 
-  while (WiFi.status() != WL_CONNECTED) {
-
-    vTaskDelay(500);
-    count++;
-    DEBUGPRINT3("+");
-    WiFi.begin(ssid, password);
-    if (count > 20) {
-      ESP.restart();
+     vTaskDelay(500);
+     count++;
+     DEBUGPRINT3("+");
+     WiFi.begin(ssid, password);
+     if (count > 20) {
+       ESP.restart();
+     }
     }
-  }
 
-  if (!client.connected()) {
-    void mqttconnect();
-  }
+    if (!client.connected()) {
+      mqttconnect(boot);
+    }
+  */
+  readVoltage();
 
-  myreadvoltage();
+  DEBUGPRINT3("Read Voltages");
 
   int alarmstatus = 0;
 
@@ -371,8 +373,9 @@ void setup()
     DEBUGPRINTLN3("SetupCompleted");
 
     updateLed();
-    rebootBuzz();
   */
+  rebootBuzz();
+
 }
 
 void loop(void)
