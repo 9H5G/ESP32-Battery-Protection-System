@@ -54,6 +54,10 @@ int lowchirp = 1;
 int chirp = 2;
 int highchirp = 3;
 
+const int lowcut = 20;
+const int lowon = 21;
+const int highcut = 30;
+const int highon = 31;
 //Temperature warnings
 int tempWarn = 40; //High temperature warning if T>40
 int tooHot = 50;
@@ -61,12 +65,6 @@ int tooHot = 50;
 /*
    Pins
 */
-
-const int lowcut = 20;
-const int lowon = 21;
-
-const int highcut = 30;
-const int highon = 31;
 
 const int LVCONPIN = 17;
 const int LVCOFFPIN = 5;
