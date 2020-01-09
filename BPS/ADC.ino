@@ -22,7 +22,7 @@ int32_t adcFilter(int adc) {
   return result ;
 }
 
-void myreadvoltage()
+void readVoltage()
 {
   uint16_t adc0 = 0, adc1 = 0, adc2 = 0, adc3 = 0;
   uint16_t ADC[] = {0, 0, 0, 0};
@@ -54,10 +54,10 @@ void myreadvoltage()
   ADC[2] = cellAve[2] * 6 * 2048 / 32768 ;
   ADC[3] = cellAve[3] * 8 * 2048 / 32768 ;
 
-  ADC[0] = ADC[0] + 27;
-  ADC[1] = ADC[1] + 60;
-  ADC[2] = ADC[2] + 57;
-  ADC[3] = ADC[3] + 70;
+  ADC[0] = ADC[0] + 20;//27;
+  ADC[1] = ADC[1] + 50;//60;
+  ADC[2] = ADC[2] + 40;//57;
+  ADC[3] = ADC[3] + 48;//70;
 
 #ifdef TESTING
   snprintf (msg, 50, " % d", ADC[0] );
