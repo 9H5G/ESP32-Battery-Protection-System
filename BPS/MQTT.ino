@@ -98,19 +98,6 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
 void mqttconnect(bool boot) {
   char msg[75];
 
-  int count = 0;
-  if    (WiFi.status() != WL_CONNECTED) {
-    WiFi.begin(ssid, password);
-
-    while (WiFi.status() != WL_CONNECTED) {
-      vTaskDelay(500);
-      count++;
-      DEBUGPRINT3("+");
-      if (count > 20) {
-        ESP.restart();
-      }
-    }
-  }
   /* Loop until reconnected */
   while (!client.connected()) {
     //    DEBUGPRINT3("MQTT connecting ...");
@@ -119,7 +106,7 @@ void mqttconnect(bool boot) {
       vTaskDelay(2);
       client.subscribe("LVC");
       client.subscribe("HVC");
-      // client.subscribe("bps/reboot");
+      //client.subscribe("bps/reboot");
 
 #ifdef TESTING
       client.subscribe("test2/cell1");

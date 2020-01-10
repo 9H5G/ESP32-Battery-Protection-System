@@ -1,7 +1,7 @@
 #define DEBUGLEVEL 3
 #include <DebugUtils.h>
 #include "credentials.h"
-const long vers = 32601;
+const long vers = 326700;
 
 #include <WiFi.h>
 #include <Wire.h>
@@ -215,23 +215,6 @@ void runEachTimer(int oldAlarmStatus)
 {
   timervar = millis() + (reportrate * 1000);
 
-  /*
-       int count = 0;
-    while (WiFi.status() != WL_CONNECTED) {
-
-     vTaskDelay(500);
-     count++;
-     DEBUGPRINT3("+");
-     WiFi.begin(ssid, password);
-     if (count > 20) {
-       ESP.restart();
-     }
-    }
-
-    if (!client.connected()) {
-      mqttconnect(boot);
-    }
-  */
   readVoltage();
 
   DEBUGPRINT3("Read Voltages");
@@ -316,16 +299,6 @@ void setup()
     5,
     &TaskD,
     tskNO_AFFINITY);//0
-  vTaskDelay(500);
-
-  xTaskCreatePinnedToCore(
-    Task1,
-    "RunTimer_Task",
-    8192,
-    NULL,
-    6,
-    &TaskA,
-    1);//1
 
   vTaskDelay(500);
 
@@ -374,11 +347,25 @@ void setup()
   */
   rebootBuzz();
 
+  vTaskDelay(2000);
+
+  xTaskCreatePinnedToCore(
+    Task1,
+    "RunTimer_Task",
+    8192,
+    NULL,
+    6,
+    &TaskA,
+    1);//1
+
 }
 
 void loop(void)
 {
   // client.loop();
+
+  wifiReconnect();
+
   vTaskDelay(2000);
 
 }

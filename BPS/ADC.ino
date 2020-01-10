@@ -118,7 +118,7 @@ void readVoltage()
     MQ_Publish(CELLSUM, msg);
   }
 
-  uptime =  esp_timer_get_time() / 3600000000;
+  uptime =  esp_timer_get_time() / 1000000;
   snprintf (msg, 50, " % u", uptime);
   MQ_Publish(UPTIME, msg);
 

@@ -40,9 +40,23 @@ void rebootBuzz()
     digitalWrite(BUZZERPIN, LOW);
     vTaskDelay (50);
   
-  
 }
 
+void reconnectBuzz()// R
+{
+   digitalWrite(BUZZERPIN, HIGH);
+    vTaskDelay (50);
+    digitalWrite(BUZZERPIN, LOW);
+    vTaskDelay (50);
+     digitalWrite(BUZZERPIN, HIGH);
+    vTaskDelay (150);
+    digitalWrite(BUZZERPIN, LOW);
+    vTaskDelay (50);
+     digitalWrite(BUZZERPIN, HIGH);
+    vTaskDelay (50);
+    digitalWrite(BUZZERPIN, LOW);
+
+}
 void testVoltages()
 {
 
