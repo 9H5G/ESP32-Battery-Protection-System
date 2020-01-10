@@ -42,9 +42,9 @@ void ServiceAlarmQueue(void * parameter) {
           if (element != currentChirp) {
             chirpTimer = 0; //bail from the loop and get the next message
             currentChirp = 0;
-           /* snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
-            MQ_Publish(STATUS, msg);
-          */
+            /* snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
+              MQ_Publish(STATUS, msg);
+            */
           } else {
             xQueueReceive (ChirpQueue, &element,  ( TickType_t ) 10 );// Get it out of the queue if its the same
           }
@@ -52,11 +52,11 @@ void ServiceAlarmQueue(void * parameter) {
       }
 
     } else {
-/*#ifdef TESTING
-      snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
-      MQ_Publish(STATUS, msg);
-#endif
-*/
+      /*#ifdef TESTING
+            snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
+            MQ_Publish(STATUS, msg);
+        #endif
+      */
     }
   }
 }
@@ -85,6 +85,31 @@ void MQ_Publish(char *mytopic, char *mymsg) {
   }
 }
 
+void wifiReconnect() {
+  if (WiFi.status() != WL_CONNECTED) {
+    int count = 0;
+    WiFi.begin(ssid, password);
+
+    reconnectBuzz();
+
+    while (WiFi.status() != WL_CONNECTED) {
+      DEBUGPRINT3("+");
+
+      vTaskDelay(200);
+      count++;
+
+      if (count > 100) {
+        ESP.restart();
+      }
+    }
+  }
+
+  if (!client.connected()) {
+    DEBUGPRINT3("In MQTT_Handle");
+    mqttconnect(boot);
+  }
+}
+
 void MQTT_Handle(void * parameter) {
   //Runs as a task
   struct MQMessage myMessage;
@@ -93,23 +118,8 @@ void MQTT_Handle(void * parameter) {
   for (;;) {
     if (wifi) {
       //Check connections
+      wifiReconnect();
 
-      int count = 0;
-      while (WiFi.status() != WL_CONNECTED) {
-        DEBUGPRINT3("+");
-        WiFi.begin(ssid, password);
-        vTaskDelay(500);
-        count++;
-
-        if (count > 20) {
-          ESP.restart();
-        }
-      }
-
-      if (!client.connected()) {
-        DEBUGPRINT3("In MQTT_Handle");
-        mqttconnect(boot);
-      }
       //Receive topic and msg from Queue
       xQueueReceive(MQ_Queue, &myMessage, portMAX_DELAY);
       vTaskDelay(10);
