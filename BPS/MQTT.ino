@@ -103,7 +103,7 @@ void mqttconnect(bool boot) {
     //    DEBUGPRINT3("MQTT connecting ...");
 
     if (client.connect(Host, MQ_user, MQ_pass)) {
-      vTaskDelay(2);
+      vTaskDelay(20);
       client.subscribe("LVC");
       client.subscribe("HVC");
       //client.subscribe("bps/reboot");
@@ -118,13 +118,11 @@ void mqttconnect(bool boot) {
 #endif
 
       if (boot) {
-        snprintf (msg, 75, "Boot: %ld", vers);
-        MQ_Publish(STATUS, msg);
         snprintf (msg, 75, "MQTT Connected, Version: %ld", vers);
         MQ_Publish(STATUS, msg);
       }
     } else {
-      vTaskDelay(2);
+      vTaskDelay(200);
     }
   }
 }

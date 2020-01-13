@@ -94,11 +94,10 @@ void wifiReconnect() {
 
     while (WiFi.status() != WL_CONNECTED) {
       DEBUGPRINT3("+");
-
-      vTaskDelay(200);
+      vTaskDelay(300);
       count++;
 
-      if (count > 100) {
+      if (count > 2000) {
         ESP.restart();
       }
     }
