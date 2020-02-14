@@ -36,30 +36,30 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
       //its ON - switch off
       relays(highcut);
       snprintf (msg, 75, "Manual: %s", "HVC");
-      MQ_Publish("outTopic", msg);
+      MQ_Publish("bps/outTopic", msg);
     } else {
       relays(highon);
       snprintf (msg, 75, "Manual: %s", "HVCon");
-      MQ_Publish("outTopic", msg);
+      MQ_Publish("bps/outTopic", msg);
     }
   }
 
   if (strcmp(ntopic, "bps/reboot") == 0) {
+    snprintf (msg, 75, "Reboot: %s", "Now");
+    MQ_Publish("bps/outTopic", msg);
+    vTaskDelay(200);
     ESP.restart();
-    //    DEBUGPRINTLN3(Cell[3]);
-    //    DEBUGPRINTLN3();
-    //return;
   }
 
 #ifdef TESTING
   if (strcmp(ntopic, "bps/testbuzz") == 0) {
     testBuzz(2);
-    snprintf (msg, 75, "%s", "Buzz");
+    //snprintf (msg, 75, "%s", "Buzz");
     //  client.publish("outTopic", "Buzzz");
     testCell[3] = testCell[3] - 1;
 
     MQ_Publish(STATUS, msg);
-    MQ_Publish("outtopic", msg);
+    MQ_Publish("bps/outtopic", msg);
   }
 
   if (strcmp(ntopic, "test2/cell1") == 0) {
@@ -97,32 +97,45 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
 
 void mqttconnect(bool boot) {
   char msg[75];
+  int count = 0;
+  client.connect(Host, MQ_user, MQ_pass);
 
   /* Loop until reconnected */
   while (!client.connected()) {
-    //    DEBUGPRINT3("MQTT connecting ...");
-
+    DEBUGPRINTLN3("MQTT connecting ...");
+    count++;
+    /* DEBUGPRINTLN3(Host);
+      DEBUGPRINTLN3(MQ_user);
+      DEBUGPRINTLN3(MQ_pass);
+    */
     if (client.connect(Host, MQ_user, MQ_pass)) {
-      vTaskDelay(20);
-      client.subscribe("LVC");
-      client.subscribe("HVC");
-      //client.subscribe("bps/reboot");
-
-#ifdef TESTING
-      client.subscribe("test2/cell1");
-      client.subscribe("test2/cell2");
-      client.subscribe("test2/cell3");
-      client.subscribe("test2/cell4");
-      client.subscribe("test2/outputTest");
-      client.subscribe("bps/testbuzz");
-#endif
+      //vTaskDelay(10);
 
       if (boot) {
         snprintf (msg, 75, "MQTT Connected, Version: %ld", vers);
         MQ_Publish(STATUS, msg);
       }
     } else {
+      //DEBUGPRINTLN3(client.state());
+
       vTaskDelay(200);
     }
+    mqBuzz();
+    if (count > 5) {
+      ESP.restart();
+    }
   }
+
+  client.subscribe("LVC");
+  client.subscribe("HVC");
+  //client.subscribe("bps/reboot");
+
+#ifdef TESTING
+  client.subscribe("test2/cell1");
+  client.subscribe("test2/cell2");
+  client.subscribe("test2/cell3");
+  client.subscribe("test2/cell4");
+  client.subscribe("test2/outputTest");
+  client.subscribe("bps/testbuzz");
+#endif
 }

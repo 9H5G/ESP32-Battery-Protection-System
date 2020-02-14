@@ -10,53 +10,52 @@ void FlashLed(int number)
 void testBuzz(int number)
 {
   for (int i = 0; i < number; i++) {
-    digitalWrite(BUZZERPIN, HIGH);
-    digitalWrite(LED_BUILTIN, HIGH);
-    vTaskDelay (50);
-    digitalWrite(BUZZERPIN, LOW);
-    digitalWrite(LED_BUILTIN, LOW);
+    dit();
     vTaskDelay (50);
   }
 }
 
-void rebootBuzz()
+void dit() {
+  digitalWrite(BUZZERPIN, HIGH);
+  vTaskDelay (50);
+  digitalWrite(BUZZERPIN, LOW);
+  vTaskDelay (50);
+}
+
+void dah() {
+  digitalWrite(BUZZERPIN, HIGH);
+  vTaskDelay (150);
+  digitalWrite(BUZZERPIN, LOW);
+  vTaskDelay (50);
+}
+ void mqBuzz()//M
+ {
+  dah();
+  dah();
+ }
+
+void rebootBuzz()//B
 {
-    digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay (150);
-    digitalWrite(BUZZERPIN, LOW);
-    vTaskDelay (50);
-
-    digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay (50);
-    digitalWrite(BUZZERPIN, LOW);
-    vTaskDelay (50);
-
-    digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay (50);
-    digitalWrite(BUZZERPIN, LOW);
-    vTaskDelay (50);
-      digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay (50);
-    digitalWrite(BUZZERPIN, LOW);
-    vTaskDelay (50);
-  
+  dah();
+  dit();
+  dit();
+  dit();
 }
 
 void reconnectBuzz()// R
 {
-   digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay (50);
-    digitalWrite(BUZZERPIN, LOW);
-    vTaskDelay (50);
-     digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay (150);
-    digitalWrite(BUZZERPIN, LOW);
-    vTaskDelay (50);
-     digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay (50);
-    digitalWrite(BUZZERPIN, LOW);
-
+  dit();
+  dah();
+  dit();
 }
+
+void disconnectBuzz()//D
+{
+  dah();
+  dit();
+  dit();
+  }
+  
 void testVoltages()
 {
 
@@ -70,10 +69,10 @@ void testVoltages()
     Cell[2] = Cell[2]+( 10 * inc);
     Cell[3] = Cell[3]+( 10 * inc);
   */
- /* Cell[0] = 3355;
+  /* Cell[0] = 3355;
 
-  Cell[1] = 3355;
-  Cell[2] = 3345;
-  Cell[3] = 3345;
-*/
+    Cell[1] = 3355;
+    Cell[2] = 3345;
+    Cell[3] = 3345;
+  */
 }

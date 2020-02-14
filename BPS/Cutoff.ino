@@ -2,7 +2,7 @@ int readled(int ledpin)
 {
   int res = digitalRead(ledpin);
   //snprintf (msg, 75, "LED %ld, %ld", ledpin, res);
- // MQ_Publish("bps/outTopic", msg);
+  // MQ_Publish("bps/outTopic", msg);
   return res;
 }
 
@@ -100,17 +100,35 @@ void output_Test()
   pinMode(GPIO1, OUTPUT);
   pinMode(GPIO2, OUTPUT);
 
+  pinMode(LEDPINLVC, INPUT);
+  pinMode(LEDPINHVC, INPUT);
+  pinMode(TEMPSIG1, INPUT);
+  pinMode(TEMPSIG2, INPUT);
+  pinMode(ADC1, INPUT);
+  pinMode(ADC2, INPUT);
+  pinMode(ADC3, INPUT);
+  pinMode(ADC4, INPUT);
+
+  pinMode(ADC_SW, OUTPUT);
+
   digitalWrite(LVCONPIN, HIGH);
   digitalWrite(LVCOFFPIN, HIGH);
   digitalWrite(HVCOFFPIN, HIGH);
   digitalWrite(HVCONPIN, HIGH);
   digitalWrite(GPIO1, HIGH);
   digitalWrite(GPIO2, HIGH);
+  digitalWrite(BUZZERPIN, LOW);
+  digitalWrite(GPIO1, LOW);
+  digitalWrite(GPIO2, LOW);
+
   digitalWrite(BUZZERPIN, HIGH);
   digitalWrite(LED_BUILTIN, HIGH);
 
   Serial.print("ONNNN");
   vTaskDelay(2000);
+
+  digitalWrite(BUZZERPIN, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 
   digitalWrite(LVCONPIN, LOW);
   digitalWrite(LVCOFFPIN, LOW);
@@ -118,8 +136,6 @@ void output_Test()
   digitalWrite(HVCONPIN, LOW);
   digitalWrite(GPIO1, LOW);
   digitalWrite(GPIO2, LOW);
-  digitalWrite(BUZZERPIN, LOW);
-  digitalWrite(LED_BUILTIN, LOW);
 
   Serial.print("OFFFF");
 }

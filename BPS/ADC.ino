@@ -27,7 +27,9 @@ void readVoltage()
   uint16_t adc0 = 0, adc1 = 0, adc2 = 0, adc3 = 0;
   uint16_t ADC[] = {0, 0, 0, 0};
   char mymsg[50];
-  int iterations = 5;
+  int iterations = 10;
+  unsigned long uptimeStart;
+  uptimeStart =  esp_timer_get_time();
 
   for (int i = 0; i < 4 ; i++) {// For each cell
 
@@ -36,13 +38,13 @@ void readVoltage()
     for (int j = 0; j < iterations; j++) {// Do up to x readings
 
       ADC[i] = adcFilter(i);
-      cellAve[i] = (cellAve[i] * 2 / 3) + (ADC[i] / 3);
+      cellAve[i] = (cellAve[i] * 3 / 4) + (ADC[i] / 4);
 
-      if (abs( cellAve[i] - ADC[i]) < 4) {
+      if (abs( cellAve[i] - ADC[i]) < 3) {
         j = iterations ;
       }
 
-    //  vTaskDelay(5);
+      //  vTaskDelay(5);
     }
 
   }
@@ -92,36 +94,44 @@ void readVoltage()
   delta = highcellv - lowcellv;
 
   if (millis() > 10000) {
-    snprintf (msg, 50, " % d", Cell[0]);
-    MQ_Publish(CELL1, msg);
-    Serial.println(msg);
-    snprintf (msg, 50, " % d", Cell[1]);
-    MQ_Publish(CELL2, msg);
-    Serial.println(msg);
-    snprintf (msg, 50, " % d", Cell[2]);
-    MQ_Publish(CELL3, msg);
-    Serial.println(msg);
-    snprintf (msg, 50, " % d", Cell[3]);
-    MQ_Publish(CELL4, msg);
-    Serial.println(msg);
+    if (millis() > reportTimer)
+    {
+      reportTimer = millis() + 5000;
 
-    snprintf (msg, 50, " % d", bank);
-    MQ_Publish(BANK, msg);
-    Serial.println(msg);
-    snprintf (msg, 50, " % d", delta);
-    MQ_Publish(DELTA, msg);
-    snprintf (msg, 50, " % d", highcell + 1);
-    MQ_Publish(HICELL, msg);
-    snprintf (msg, 50, " % d", lowcell + 1);
-    MQ_Publish(LOCELL, msg);
-    snprintf (msg, 50, " % d", cellsum + 1);
-    MQ_Publish(CELLSUM, msg);
+      snprintf (msg, 50, " % d", Cell[0]);
+      MQ_Publish(CELL1, msg);
+      Serial.println(msg);
+      snprintf (msg, 50, " % d", Cell[1]);
+      MQ_Publish(CELL2, msg);
+      Serial.println(msg);
+      snprintf (msg, 50, " % d", Cell[2]);
+      MQ_Publish(CELL3, msg);
+      Serial.println(msg);
+      snprintf (msg, 50, " % d", Cell[3]);
+      MQ_Publish(CELL4, msg);
+      Serial.println(msg);
+
+      snprintf (msg, 50, " % d", bank);
+      MQ_Publish(BANK, msg);
+      Serial.println(msg);
+      snprintf (msg, 50, " % d", delta);
+      MQ_Publish(DELTA, msg);
+      snprintf (msg, 50, " % d", highcell + 1);
+      MQ_Publish(HICELL, msg);
+      snprintf (msg, 50, " % d", lowcell + 1);
+      MQ_Publish(LOCELL, msg);
+      snprintf (msg, 50, " % d", cellsum + 1);
+      MQ_Publish(CELLSUM, msg);
+    }
   }
 
-  uptime =  esp_timer_get_time() / 1000000;
-  snprintf (msg, 50, " % u", uptime);
-  MQ_Publish(UPTIME, msg);
+  uptime =  esp_timer_get_time();
 
+  snprintf (msg, 50, " % u", (uptime - uptimeStart));
+  MQ_Publish("bps/readtime", msg);
+
+  snprintf (msg, 50, " % u", (uptime / 1000000));
+  MQ_Publish(UPTIME, msg);
 }
 
 /*

@@ -90,23 +90,20 @@ void wifiReconnect() {
     int count = 0;
     WiFi.begin(ssid, password);
 
-    reconnectBuzz();
+    disconnectBuzz();
 
     while (WiFi.status() != WL_CONNECTED) {
       DEBUGPRINT3("+");
-      vTaskDelay(300);
+      vTaskDelay(200);
       count++;
 
-      if (count > 2000) {
+      if (count > 600) {
+        reconnectBuzz();
         ESP.restart();
       }
     }
   }
-
-  if (!client.connected()) {
-    DEBUGPRINT3("In MQTT_Handle");
-    mqttconnect(boot);
-  }
+  mqttconnect(boot);
 }
 
 void MQTT_Handle(void * parameter) {

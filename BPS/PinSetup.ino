@@ -2,7 +2,7 @@ void PinSetup() {
   //Wire.begin( mySDA,mySCL);
 
   pinMode(LED_BUILTIN, OUTPUT);
-digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_BUILTIN, LOW);
 
   pinMode(HVCOFFPIN, OUTPUT);
   digitalWrite(HVCOFFPIN, LOW);
@@ -20,7 +20,7 @@ digitalWrite(LED_BUILTIN, LOW);
   pinMode(LEDPINHVC, INPUT);
 
   pinMode(BUZZERPIN, OUTPUT);
- digitalWrite(BUZZERPIN, LOW);
+  digitalWrite(BUZZERPIN, LOW);
 
   pinMode(GPIO1, OUTPUT);
   digitalWrite(GPIO1, LOW);
@@ -39,7 +39,15 @@ digitalWrite(LED_BUILTIN, LOW);
   pinMode(ADC_SW, OUTPUT);
 }
 /*
-
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(HVCOFFPIN, OUTPUT);
+  pinMode(HVCONPIN, OUTPUT);
+  pinMode(LVCONPIN, OUTPUT);
+  pinMode(LVCOFFPIN, OUTPUT);
+  pinMode(BUZZERPIN, OUTPUT);
+  pinMode(GPIO1, OUTPUT);
+  pinMode(GPIO2, OUTPUT);
+  
   const int LVCONPIN  = 4;
   const int LVCOFFPIN  = 16;
   const int LEDPINLVC = 26;

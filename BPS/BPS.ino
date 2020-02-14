@@ -1,11 +1,13 @@
 #define DEBUGLEVEL 3
 #include <DebugUtils.h>
 #include "credentials.h"
-const long vers = 326700;
+const long vers = 326721;
 
 #include <WiFi.h>
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
+#include <ESPmDNS.h>
+
 #include <ArduinoOTA.h>
 #include <FS.h>
 #include <PubSubClient.h>
@@ -40,10 +42,11 @@ const long vers = 326700;
 int inc = 1;
 
 long runcounter = 0;
-
 bool defaultsettings = true;
 bool outputTest = false;
 unsigned long uptime;
+unsigned long reportTimer = 0;
+
 int pulseLength = 1000;
 
 /*
@@ -175,9 +178,9 @@ long          high_bankcutoff = 14200;
 long          low_bankwarn = 12000;
 long          low_bankcutoff = 11500;
 long          deltawarn = 100;
-long          deltacutoff = 150;
+long          deltacutoff = 1250;
 
-int             reportrate = 2;
+int             reportrate = 1;
 char msg[75];
 
 struct MQMessage {
@@ -271,23 +274,22 @@ void setup()
 
   loadConfig();
 
-  WiFi.disconnect();
+  rebootBuzz();
+
+  //WiFi.disconnect();
   WiFi.mode(WIFI_STA);
   WiFi.setHostname(Host);
-
   WiFi.begin(ssid, password);
+  vTaskDelay(500);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    vTaskDelay(500);
-    Serial.print("S+");
-  }
 
   /* configure the MQTT server with IPaddress and port */
-  /*DEBUGPRINTLN3(mqtt_server);
-  */
+
   client.setServer(mqtt_server, 1883);
   client.setCallback(receivedCallback);
-  mqttconnect(boot);
+  wifiReconnect();
+
+  //mqttconnect(boot);
 
   OTA_Setup();
 
@@ -345,7 +347,6 @@ void setup()
 
     updateLed();
   */
-  rebootBuzz();
 
   vTaskDelay(2000);
 
@@ -364,7 +365,7 @@ void loop(void)
 {
   // client.loop();
 
-  wifiReconnect();
+  //  wifiReconnect();
 
   vTaskDelay(2000);
 

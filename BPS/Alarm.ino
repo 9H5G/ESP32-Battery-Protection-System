@@ -6,21 +6,12 @@ void Chirp(int number)
   if (number < 10) {
     if (millis() > cancel_alarm.cancelTimer ) {
       for (int i = 0; i < number; i++) {
-        digitalWrite(BUZZERPIN, HIGH);
-        //digitalWrite(LED_BUILTIN, HIGH);
-
-        vTaskDelay(50);
-
-        digitalWrite(BUZZERPIN, LOW);
-        //digitalWrite(LED_BUILTIN, LOW);
-        vTaskDelay(100);
+        dit();
       }
     }
   }
   if (number == tempWarn) { // 'T' for temperature
-    digitalWrite(BUZZERPIN, HIGH);
-    vTaskDelay(300);
-    digitalWrite(BUZZERPIN, LOW);
+    dah();
   }
 }
 
