@@ -9,10 +9,16 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
   buf[i] = '\0';
 
   char ntopic[20];
+
   strcpy (ntopic, topic);
   MQ_Publish(STATUS, ntopic);
 
   if (strcmp(ntopic, "LVC") == 0) {
+    dit();
+    dah();
+    dit();
+    dit();
+
     int res = readled(LEDPINLVC);
 
     if (readled(LEDPINLVC) == 0) {
@@ -28,6 +34,10 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
   }
 
   if (strcmp(ntopic, "HVC") == 0) {
+    dit();
+    dit();
+    dit();
+    dit();
     int res = readled(LEDPINHVC);
     snprintf (msg, 75, "%ld", res);
     MQ_Publish("readledhvc", msg);
@@ -92,42 +102,44 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
     output_Test();
   }
 #endif
-  //  return;
+
 }
 
 void mqttconnect(bool boot) {
   char msg[75];
   int count = 0;
-  client.connect(Host, MQ_user, MQ_pass);
+  //  client.connect(Host, MQ_user, MQ_pass);
 
   /* Loop until reconnected */
   while (!client.connected()) {
-    DEBUGPRINTLN3("MQTT connecting ...");
+    //  DEBUGPRINTLN3("MQTT connecting ...");
     count++;
-    /* DEBUGPRINTLN3(Host);
-      DEBUGPRINTLN3(MQ_user);
-      DEBUGPRINTLN3(MQ_pass);
-    */
     if (client.connect(Host, MQ_user, MQ_pass)) {
-      //vTaskDelay(10);
-
       if (boot) {
         snprintf (msg, 75, "MQTT Connected, Version: %ld", vers);
         MQ_Publish(STATUS, msg);
-      }
-    } else {
-      //DEBUGPRINTLN3(client.state());
+        // reconnectBuzz();
+        //  mqBuzz();
+        client.subscribe("LVC");
+        client.subscribe("HVC");
+        client.subscribe("bps/beat");
+        client.subscribe("bps/reboot");
 
-      vTaskDelay(200);
-    }
-    mqBuzz();
-    if (count > 5) {
-      ESP.restart();
+      } else {
+        if (count > 5) {
+          ESP.restart();
+        }
+        vTaskDelay(200);
+        // reconnectBuzz();
+        //  mqBuzz();
+      }
+      client.subscribe("LVC");
+      client.subscribe("HVC");
+      client.subscribe("bps/beat");
+      client.subscribe("bps/reboot");
     }
   }
 
-  client.subscribe("LVC");
-  client.subscribe("HVC");
   //client.subscribe("bps/reboot");
 
 #ifdef TESTING

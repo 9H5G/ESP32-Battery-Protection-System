@@ -155,6 +155,10 @@ int calculate_alarms()
   snprintf (msg, 75, "%d", alarmstate);
   MQ_Publish(ALARM, msg);
 
+    deltaSum = deltaSum + delta;
+    snprintf (msg, 75, "%d", deltaSum);
+    MQ_Publish(DELTASUM, msg);
+    
   // check for 'diverging Delta' fault
   if (delta > deltawarn) {
     deltaSum = deltaSum + delta;

@@ -1,14 +1,12 @@
 void Task1(void * parameter ) {
   int oldalarmstatus = 0;
   for (;;) {
-    if (wifi) {
-      client.loop();
-      ArduinoOTA.handle();
-    }
     if (millis() > timervar) {
       runEachTimer(oldalarmstatus);
     }
-    vTaskDelay(100);
+    client.loop();
+    ArduinoOTA.handle();
+    vTaskDelay(50);
   }
 }
 
@@ -98,12 +96,11 @@ void wifiReconnect() {
       count++;
 
       if (count > 600) {
-        reconnectBuzz();
         ESP.restart();
       }
     }
   }
-  mqttconnect(boot);
+  mqttconnect(false);
 }
 
 void MQTT_Handle(void * parameter) {
@@ -115,7 +112,6 @@ void MQTT_Handle(void * parameter) {
     if (wifi) {
       //Check connections
       wifiReconnect();
-
       //Receive topic and msg from Queue
       xQueueReceive(MQ_Queue, &myMessage, portMAX_DELAY);
       vTaskDelay(10);
@@ -127,6 +123,7 @@ void MQTT_Handle(void * parameter) {
       }
       maxUsed = stackUsed;
     }
+    client.loop();
   }
 }
 

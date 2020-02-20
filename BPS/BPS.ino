@@ -158,8 +158,8 @@ int16_t cellsum = 0;
 int highcellv = 0;
 int lowcellv = 0;
 int delta = 0;
-int Cell[] = {3250, 3251, 3252, 3253};
-int cellAve[] = {3250, 3251, 3252, 3253};
+int Cell[] = {3350, 3350, 3350, 3350};
+int cellAve[] = {3350, 3350, 3350, 3350};
 int deltaSum = 0;
 
 #ifdef TESTING
@@ -251,7 +251,7 @@ void runEachTimer(int oldAlarmStatus)
 
   updateLed();
   ArduinoOTA.handle();
-
+  client.loop();
 }
 
 void setup()
@@ -288,8 +288,6 @@ void setup()
   client.setServer(mqtt_server, 1883);
   client.setCallback(receivedCallback);
   wifiReconnect();
-
-  //mqttconnect(boot);
 
   OTA_Setup();
 
@@ -348,7 +346,7 @@ void setup()
     updateLed();
   */
 
-  vTaskDelay(2000);
+  vTaskDelay(1000);
 
   xTaskCreatePinnedToCore(
     Task1,
@@ -363,10 +361,10 @@ void setup()
 
 void loop(void)
 {
-  // client.loop();
 
-  //  wifiReconnect();
+  client.loop();
+  ArduinoOTA.handle();
 
-  vTaskDelay(2000);
+  vTaskDelay(500);
 
 }
