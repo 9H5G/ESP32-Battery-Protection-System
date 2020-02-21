@@ -26,9 +26,13 @@ be necessary.</font></p>
 <p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
 <font face="Noto Mono">	ESP32</font></p>
 <p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
+<font face="Noto Mono">	1 Hz update rate</font></p>
+<p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
 <font face="Noto Mono">	MQTT output for remote monitoring</font></p>
 <p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
-<font face="Noto Mono">	ADC noise, 4mV</font></p>
+<font face="Noto Mono">	BLE server for monitoring</font></p>
+<p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
+<font face="Noto Mono">	ADC noise, <4mV</font></p>
 <p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
 <font face="Noto Mono">	Programmable warning and cutoff thresholds</font></p>
 <p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
