@@ -1,7 +1,7 @@
 void ADC_Setup() {
   ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
   ads.begin();
-  ads.setSPS(ADS1115_DR_8SPS);
+  ads.setSPS(ADS1115_DR_64SPS);
 }
 
 int32_t adcFilter(int adc) {
@@ -28,24 +28,23 @@ void readVoltage()
   uint16_t adc0 = 0, adc1 = 0, adc2 = 0, adc3 = 0;
   uint16_t ADC[] = {0, 0, 0, 0};
   char mymsg[50];
-  int iterations = 1;
+  int iterations = 9;
   unsigned long uptimeStart;
   uptimeStart =  esp_timer_get_time();
 
   for (int i = 0; i < 4 ; i++) {// For each cell
 
-    //ADC[i] = ads.readADC_SingleEnded(i);// Read each cell to get rid of previous value
+    ADC[i] = ads.readADC_SingleEnded(i);// Read each cell to get rid of previous value
 
-   // for (int j = 0; j < iterations; j++) {// Do up to x readings
+    for (int j = 0; j < iterations; j++) {// Do up to x readings
 
       ADC[i] = adcFilter(i);
-      //    cellAve[i] = (cellAve[i] * 3 / 4) + (ADC[i] / 4);
-      cellAve[i] = ADC[i];
- /*     if (abs( cellAve[i] - ADC[i]) < 3) {
+      cellAve[i] = (cellAve[i] * 3/4) + (ADC[i] / 4);
+      // cellAve[i] = ADC[i];
+      if (abs( cellAve[i] - ADC[i]) < 4) {
         j = iterations ;
       }
-   */
- //}
+    }
   }
   /*
      Convert to Voltage
