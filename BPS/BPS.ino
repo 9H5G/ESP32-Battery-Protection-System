@@ -7,6 +7,7 @@ const long vers = 326721;
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 #include <ESPmDNS.h>
+
 #include <ArduinoOTA.h>
 #include <FS.h>
 #include <PubSubClient.h>
