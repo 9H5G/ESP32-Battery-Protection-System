@@ -94,9 +94,12 @@ void wifiReconnect() {
       DEBUGPRINT3("+");
       vTaskDelay(200);
       count++;
-
-      if (count > 600) {
-        ESP.restart();
+      if ((count % 300) == 0) {
+       WiFi.begin(ssid, password);
+      }
+      if (count > 1500) {
+      timeOutCounter = count;
+      ESP.restart();
       }
     }
   }
@@ -106,7 +109,8 @@ void wifiReconnect() {
 void MQTT_Handle(void * parameter) {
   //Runs as a task
   struct MQMessage myMessage;
-  char msg[50];
+  char msg[75];
+  vTaskDelay(1000);
 
   for (;;) {
     if (wifi) {
@@ -114,7 +118,7 @@ void MQTT_Handle(void * parameter) {
       wifiReconnect();
       //Receive topic and msg from Queue
       xQueueReceive(MQ_Queue, &myMessage, portMAX_DELAY);
-      vTaskDelay(10);
+      vTaskDelay(5);
       client.publish(myMessage.topic, myMessage.message);
       static uint32_t maxUsed = 0;
       uint32_t stackUsed = uxTaskGetStackHighWaterMark(NULL);
@@ -122,6 +126,8 @@ void MQTT_Handle(void * parameter) {
         Serial.printf("MQTT_Handler increased Stack usage = %d\n", stackUsed);
       }
       maxUsed = stackUsed;
+      Serial.print("Queue Length: ");
+      Serial.println( uxQueueMessagesWaiting(MQ_Queue));
     }
     client.loop();
   }

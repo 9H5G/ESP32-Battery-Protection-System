@@ -15,6 +15,7 @@ const long vers = 326721;
 #include <ArduinoJson.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <rom/rtc.h>
 
 #define CELL1       "bps/cell1"
 #define CELL2       "bps/cell2"
@@ -185,7 +186,7 @@ char msg[75];
 
 struct MQMessage {
   char topic[32];
-  char message[32];
+  char message[48];
 };
 
 struct Button {
@@ -214,21 +215,26 @@ int deviceCount = 0;
 float tempC;
 int temperatures[2];
 
+/*
+   RTC Data Partition
+*/
+RTC_DATA_ATTR char timeOutCounter = 0;
+
 void runEachTimer(int oldAlarmStatus)
 {
   timervar = millis() + (reportrate * 1000);
 
   readVoltage();
 
-  DEBUGPRINT3("Read Voltages");
+  //DEBUGPRINTLN3("Read Voltages");
 
   int alarmstatus = 0;
 
   alarmstatus = (int) calculate_alarms();
 
   oldAlarmStatus = alarmstatus;
-  DEBUGPRINT3("Final AlarmStatus: ");
-  DEBUGPRINTLN3(alarmstatus);
+  //DEBUGPRINT3("Final AlarmStatus: ");
+  //DEBUGPRINTLN3(alarmstatus);
 
   runalarms(alarmstatus, oldAlarmStatus);
 
@@ -250,6 +256,8 @@ void runEachTimer(int oldAlarmStatus)
   MQ_Publish(TEMP2, msg);
 
   updateLed();
+  DEBUGPRINTLN3("Update Led Line");
+
   ArduinoOTA.handle();
   client.loop();
 }
@@ -263,7 +271,7 @@ void setup()
 
   ChirpQueue = xQueueCreate( 10, sizeof( int ));
   PrintQueue = xQueueCreate( 10, 32);
-  MQ_Queue = xQueueCreate(15, sizeof(struct MQMessage));
+  MQ_Queue = xQueueCreate(750, sizeof(struct MQMessage));
   // ChirpSilenceQ = xQueueCreate(5, sizeof( bool ));
 
   Serial.begin(115200);
@@ -357,6 +365,22 @@ void setup()
     &TaskA,
     1);//1
 
+  vTaskDelay(1000);
+
+  //Serial.println("CPU0 reset reason:");
+  //print_reset_reason(rtc_get_reset_reason(0));
+  // verbose_print_reset_reason(rtc_get_reset_reason(0));
+
+  //Serial.println("CPU1 reset reason:");
+  //print_reset_reason(rtc_get_reset_reason(1));
+  // verbose_print_reset_reason(rtc_get_reset_reason(1));
+
+  print_reset_reason(rtc_get_reset_reason(0));
+  print_reset_reason(rtc_get_reset_reason(1));
+  DEBUGPRINTLN3(timeOutCounter);
+  
+  snprintf (msg, 75, "Reset: %u", timeOutCounter ); 
+  MQ_Publish("bps/timeOutCounter", msg);
 }
 
 void loop(void)

@@ -11,12 +11,7 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
   char ntopic[20];
 
   strcpy (ntopic, topic);
-
   MQ_Publish(STATUS, ntopic);
-  DEBUGPRINTLN3("");
-  DEBUGPRINT3("Topic: ");
-  DEBUGPRINTLN3(ntopic);
-  DEBUGPRINTLN3("");
 
   if (strcmp(ntopic, "LVC") == 0) {
     dit();
@@ -60,7 +55,7 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
   }
 
   if (strcmp(ntopic, "bps/restart") == 0) {
-    snprintf (msg, 75, "Restart: %s", "Now");
+    snprintf (msg, 75, "Reboot: %s", "Now");
     MQ_Publish("bps/outTopic", msg);
     vTaskDelay(200);
     ESP.restart();
@@ -113,7 +108,6 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
 void mqttconnect(bool boot) {
   char msg[75];
   int count = 0;
-  //  client.connect(Host, MQ_user, MQ_pass);
 
   /* Loop until reconnected */
   while (!client.connected()) {
@@ -128,20 +122,21 @@ void mqttconnect(bool boot) {
         client.subscribe("LVC");
         client.subscribe("HVC");
         client.subscribe("bps/beat");
-        //        client.subscribe("bps/reboot");
+        client.subscribe("bps/restart");
 
       } else {
-        if (count > 5) {
+        if (count > 1500) {
           ESP.restart();
         }
         vTaskDelay(200);
-        // reconnectBuzz();
+        reconnectBuzz();
         //  mqBuzz();
       }
       client.subscribe("LVC");
       client.subscribe("HVC");
       client.subscribe("bps/beat");
       client.subscribe("bps/restart");
+     
     }
   }
 
