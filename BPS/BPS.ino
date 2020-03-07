@@ -24,17 +24,17 @@ const long vers = 326721;
 #define BANK        "bps/bank"
 #define DELTA       "bps/delta"
 #define HICELL      "bps/hicell"
-#define LOCELL     "bps/locell"
-#define CELLSUM  "bps/cellsum"
-#define STATUS     "bps/status"
-#define LVCLED     "bps/LVCled"
-#define HVCLED    "bps/HVCled"
-#define CUTOFF    "bps/cutoff"
-#define UPTIME     "bps/uptime"
-#define TEMP1      "bps/temp1"
-#define TEMP2      "bps/temp2"
-#define ALARM      "bps/alarm"
-#define DELTASUM  "bps/deltaSum"
+#define LOCELL      "bps/locell"
+#define CELLSUM     "bps/cellsum"
+#define STATUS      "bps/status"
+#define LVCLED      "bps/LVCled"
+#define HVCLED      "bps/HVCled"
+#define CUTOFF      "bps/cutoff"
+#define UPTIME      "bps/uptime"
+#define TEMP1       "bps/temp1"
+#define TEMP2       "bps/temp2"
+#define ALARM       "bps/alarm"
+#define DELTASUM    "bps/deltaSum"
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
@@ -181,7 +181,10 @@ long          low_bankcutoff = 11500;
 long          deltawarn = 100;
 long          deltacutoff = 1250;
 
-int             reportrate = 1;
+int alarmLimit = 5;
+int alarmCount = 0;
+
+int  reportrate = 1;
 char msg[75];
 
 struct MQMessage {
@@ -231,28 +234,25 @@ void runEachTimer(int oldAlarmStatus)
   int alarmstatus = 0;
 
   alarmstatus = (int) calculate_alarms();
-
   oldAlarmStatus = alarmstatus;
-  //DEBUGPRINT3("Final AlarmStatus: ");
-  //DEBUGPRINTLN3(alarmstatus);
 
   runalarms(alarmstatus, oldAlarmStatus);
 
   int answer = 100;
-  answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
+  answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
+  snprintf (msg, 75, "%d", answer);
   MQ_Publish(LVCLED, msg);
 
-  answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
+  answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
+  snprintf (msg, 75, "%d", answer);
   MQ_Publish(HVCLED, msg);
 
   getTemperatures();
   runTemperatureAlarm();
 
-  snprintf (msg, 75, "%d", temperatures[0]);
+  snprintf (msg, 75, "%f", temperatures[0]);
   MQ_Publish(TEMP1, msg);
-  snprintf (msg, 75, "%d", temperatures[1]);
+  snprintf (msg, 75, "%f", temperatures[1]);
   MQ_Publish(TEMP2, msg);
 
   updateLed();
@@ -378,8 +378,8 @@ void setup()
   print_reset_reason(rtc_get_reset_reason(0));
   print_reset_reason(rtc_get_reset_reason(1));
   DEBUGPRINTLN3(timeOutCounter);
-  
-  snprintf (msg, 75, "Reset: %u", timeOutCounter ); 
+
+  snprintf (msg, 75, "Reset: %u", timeOutCounter );
   MQ_Publish("bps/timeOutCounter", msg);
 }
 

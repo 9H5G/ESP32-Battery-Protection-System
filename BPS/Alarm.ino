@@ -155,10 +155,10 @@ int calculate_alarms()
   snprintf (msg, 75, "%d", alarmstate);
   MQ_Publish(ALARM, msg);
 
-    deltaSum = deltaSum + delta;
-    snprintf (msg, 75, "%d", deltaSum);
-    MQ_Publish(DELTASUM, msg);
-    
+  deltaSum = deltaSum + delta;
+  snprintf (msg, 75, "%d", deltaSum);
+  MQ_Publish(DELTASUM, msg);
+
   // check for 'diverging Delta' fault
   if (delta > deltawarn) {
     deltaSum = deltaSum + delta;
@@ -179,13 +179,22 @@ int calculate_alarms()
 
 void runalarms(int alarmcode, int oldAlarmCode) {
 
+  if ((alarmcode == lowcut ) || (alarmcode == highcut))
+  {
+    alarmCount = alarmCount + 1;
+  }
+  snprintf (msg, 75, "%d", alarmCount);
+  MQ_Publish("bps/alarmcount", msg);
+  
   //Action required
   //Only do the cutoff if it has not worked
-  if ((alarmcode == lowcut)) { // && (readled(LEDPINLVC) == 0)) {
-    // relays(lowcut);
+  if ((alarmcode == lowcut)  && (alarmCount > alarmLimit)) {
+    relays(lowcut);
+    alarmCount = 0;
   }
-  if ((alarmcode == highcut)) { // && (readled(LEDPINHVC) == 0)) {
-    //relays(highcut);
+  if ((alarmcode == highcut) && (alarmCount > alarmLimit)) {
+    relays(highcut);
+    alarmCount = 0;
   }
 
 }
