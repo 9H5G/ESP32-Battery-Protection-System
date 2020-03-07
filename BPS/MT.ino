@@ -26,7 +26,7 @@ void ServiceAlarmQueue(void * parameter) {
       if (element > currentChirp) {// If its a higher priority alarm reset timer and chirp this alarm
         currentChirp = element;
         chirpTimer = millis() + 2000;
-        snprintf (msg, 75, "CurrentChirp %ld", currentChirp);
+        snprintf (msg, 75, "CurrentChirp %d", currentChirp);
         MQ_Publish(STATUS, msg);
       }
 
@@ -40,7 +40,7 @@ void ServiceAlarmQueue(void * parameter) {
           if (element != currentChirp) {
             chirpTimer = 0; //bail from the loop and get the next message
             currentChirp = 0;
-            /* snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
+            /* snprintf (msg, 75, "Bailing %d : %d", millis(), chirpTimer);
               MQ_Publish(STATUS, msg);
             */
           } else {
@@ -51,7 +51,7 @@ void ServiceAlarmQueue(void * parameter) {
 
     } else {
       /*#ifdef TESTING
-            snprintf (msg, 75, "Bailing %ld : %ld", millis(), chirpTimer);
+            snprintf (msg, 75, "Bailing %d : %d", millis(), chirpTimer);
             MQ_Publish(STATUS, msg);
         #endif
       */

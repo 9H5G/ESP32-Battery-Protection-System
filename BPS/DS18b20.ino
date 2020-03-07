@@ -46,15 +46,16 @@ void runTemperatureAlarm()
       relays(lowcut);
       relays(highcut);
     }
-    
+
     if (temperatures[i] < 0)//Inhibit charging
     {
       relays(highcut);
+      
     }
 
-      if (temperatures[i] > tempWarn)
+    if (temperatures[i] > tempWarn)
     {
-xQueueSend(ChirpQueue, &tempWarn, 0);
+      xQueueSend(ChirpQueue, &tempWarn, 0);
     }
   }
 }

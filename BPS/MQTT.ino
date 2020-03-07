@@ -39,7 +39,7 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
     dit();
     dit();
     int res = readled(LEDPINHVC);
-    snprintf (msg, 75, "%ld", res);
+    snprintf (msg, 75, "%d", res);
     MQ_Publish("readledhvc", msg);
 
     if (readled(LEDPINHVC) == 0) {
@@ -74,7 +74,7 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
 
   if (strcmp(ntopic, "test2/cell1") == 0) {
     testCell[0] = atoi(buf);
-    //snprintf (msg, 75, "%ld", Cell[0]);
+    //snprintf (msg, 75, "%d", Cell[0]);
     //client.publish("outTopic", msg);
     DEBUGPRINT3("Cell[0]: ");
     DEBUGPRINTLN3(Cell[0]);
@@ -115,7 +115,7 @@ void mqttconnect(bool boot) {
     count++;
     if (client.connect(Host, MQ_user, MQ_pass)) {
       if (boot) {
-        snprintf (msg, 75, "MQTT Connected, Version: %ld", vers);
+        snprintf (msg, 75, "MQTT Connected, Version: %d", vers);
         MQ_Publish(STATUS, msg);
         // reconnectBuzz();
         //  mqBuzz();

@@ -1,7 +1,7 @@
 int readled(int ledpin)
 {
   int res = digitalRead(ledpin);
-  //snprintf (msg, 75, "LED %ld, %ld", ledpin, res);
+  //snprintf (msg, 75, "LED %d, %d", ledpin, res);
   // MQ_Publish("bps/outTopic", msg);
   return res;
 }
@@ -52,26 +52,26 @@ void relays(int mtype)
 
     int answer = 100;
 
-    snprintf (msg, 75, "%ld", LEDPINHVC);
+    snprintf (msg, 75, "%d", LEDPINHVC);
     MQ_Publish("ReadLEDHVC", msg);
 
-    snprintf (msg, 75, "%ld", answer);
+    snprintf (msg, 75, "%d", answer);
     MQ_Publish("ReadLEDResult", msg);
 
     answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
-    snprintf (msg, 75, "%ld", answer);
+    snprintf (msg, 75, "%d", answer);
     MQ_Publish(HVCLED, msg);
 
     answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-    snprintf (msg, 75, "%ld", answer);
+    snprintf (msg, 75, "%d", answer);
     MQ_Publish(LVCLED, msg);
 
     answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-    snprintf (msg, 75, "%ld", LEDPINLVC);
+    snprintf (msg, 75, "%d", LEDPINLVC);
     MQ_Publish("ReadLEDLVC", msg);
 
     answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-    snprintf (msg, 75, "%ld", answer);
+    snprintf (msg, 75, "%d", answer);
     MQ_Publish("ReadLEDResult", msg);
 
   }
@@ -80,11 +80,11 @@ void updateLed()
 {
   int answer = 100;
   answer = (readled(LEDPINHVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
+  snprintf (msg, 75, "%d", answer);
   MQ_Publish("HVCled", msg);
 
   answer = (readled(LEDPINLVC) == 0) ? 1 : 0;
-  snprintf (msg, 75, "%ld", answer);
+  snprintf (msg, 75, "%d", answer);
   MQ_Publish("LVCled", msg);
 }
 
