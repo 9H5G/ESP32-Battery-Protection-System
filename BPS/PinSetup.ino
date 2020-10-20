@@ -1,6 +1,6 @@
-void PinSetup() {
-  //Wire.begin( mySDA,mySCL);
 
+void PinSetup() {
+  
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
@@ -31,12 +31,14 @@ void PinSetup() {
   pinMode(TEMPSIG1, INPUT);
   pinMode(TEMPSIG2, INPUT);
 
-  pinMode(ADC1, INPUT);
+/*
+pinMode(ADC1, INPUT);
   pinMode(ADC2, INPUT);
   pinMode(ADC3, INPUT);
   pinMode(ADC4, INPUT);
 
   pinMode(ADC_SW, OUTPUT);
+*/
 }
 /*
   pinMode(LED_BUILTIN, OUTPUT);

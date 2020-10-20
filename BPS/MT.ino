@@ -84,10 +84,10 @@ void MQ_Publish(char *mytopic, char *mymsg) {
 }
 
 void wifiReconnect() {
+  
   if (WiFi.status() != WL_CONNECTED) {
     int count = 0;
     WiFi.begin(ssid, password);
-
     disconnectBuzz();
 
     while (WiFi.status() != WL_CONNECTED) {
@@ -126,8 +126,9 @@ void MQTT_Handle(void * parameter) {
         Serial.printf("MQTT_Handler increased Stack usage = %d\n", stackUsed);
       }
       maxUsed = stackUsed;
-      Serial.print("Queue Length: ");
+      /*Serial.print("Queue Length: ");
       Serial.println( uxQueueMessagesWaiting(MQ_Queue));
+    */
     }
     client.loop();
   }

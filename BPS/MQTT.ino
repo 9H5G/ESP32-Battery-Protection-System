@@ -108,10 +108,9 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
 void mqttconnect(bool boot) {
   char msg[75];
   int count = 0;
-
   /* Loop until reconnected */
   while (!client.connected()) {
-    //  DEBUGPRINTLN3("MQTT connecting ...");
+      DEBUGPRINTLN3("MQTT connecting ...");
     count++;
     if (client.connect(Host, MQ_user, MQ_pass)) {
       if (boot) {
@@ -131,6 +130,9 @@ void mqttconnect(bool boot) {
         vTaskDelay(200);
         reconnectBuzz();
         //  mqBuzz();
+        Serial.print(MQ_user);
+        Serial.print(" : ");
+        Serial.println(MQ_pass);
       }
       client.subscribe("LVC");
       client.subscribe("HVC");

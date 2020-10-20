@@ -1,4 +1,6 @@
 #define DEBUGLEVEL 3
+#define LED_BUILTIN 33
+
 #include <DebugUtils.h>
 #include "credentials.h"
 const long vers = 326721;
@@ -7,7 +9,6 @@ const long vers = 326721;
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 #include <ESPmDNS.h>
-
 #include <ArduinoOTA.h>
 #include <FS.h>
 #include <PubSubClient.h>
@@ -16,6 +17,15 @@ const long vers = 326721;
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <rom/rtc.h>
+
+#define ESP32_CAN_TX_PIN GPIO_NUM_22 //for BMS was 16
+#define ESP32_CAN_RX_PIN GPIO_NUM_23 // was 4
+#define BatUpdatePeriod 2000
+
+//#define N2k_CAN_INT_PIN 21
+#include "NMEA2000_CAN.h"       // This will automatically choose right CAN library and create suitable NMEA2000 object
+#include "N2kMessages.h"
+#include "NMEA2K.h"
 
 #define CELL1       "bps/cell1"
 #define CELL2       "bps/cell2"
@@ -74,37 +84,39 @@ const int LVCONPIN = 17;
 const int LVCOFFPIN = 5;
 
 const int LEDPINLVC = 26;
-const int LEDPINHVC = 25;
+const int LEDPINHVC = 32;
 
 const int HVCOFFPIN = 4;
 const int HVCONPIN = 16;
 
-//const int mySCL = 22;
-//const int mySDA = 21;
+const int mySCL = 25;//25 //12;
+const int mySDA = 21;
 
 const int GPIO2 = 18;
 const int GPIO1 = 19;
 
-const int TEMPSIG1 = 23;
-const int TEMPSIG2 = 27;
+const int TEMPSIG1 = 33;
+const int TEMPSIG2 = 14;
 
-const int BUZZERPIN = 32;
+const int BUZZERPIN = 13;
 
 const int TOUCH1 = 31;
 const int TOUCH2 = 30;
 const int TOUCH3 = 29;
 
-const int ADC_SW = 33;
-const int ADC1 = 35;
-const int ADC2 = 34;
-const int ADC3 = 39;
-const int ADC4 = 36;
-
-const int JTAG1 = 13;
-const int JTAG2 = 12;
-const int JTAG3 = 14;
-const int JTAG4 = 15;
-
+/*
+  const int ADC_SW = 33;
+  const int ADC1 = 35;
+  const int ADC2 = 34;
+  const int ADC3 = 39;
+  const int ADC4 = 36;
+*/
+/*
+  const int JTAG1 = 13;
+  const int JTAG2 = 12;
+  const int JTAG3 = 14;
+  const int JTAG4 = 15;
+*/
 const int CANCELALARM = 13;
 /*
    Copy to credentials.ino and fill in your details
@@ -227,12 +239,11 @@ void runEachTimer(int oldAlarmStatus)
 {
   timervar = millis() + (reportrate * 1000);
 
+  DEBUGPRINTLN3("Read Voltages");
+
   readVoltage();
 
-  //DEBUGPRINTLN3("Read Voltages");
-
   int alarmstatus = 0;
-
   alarmstatus = (int) calculate_alarms();
   oldAlarmStatus = alarmstatus;
 
@@ -265,7 +276,6 @@ void runEachTimer(int oldAlarmStatus)
 void setup()
 {
   setup_interrupts();
-  ADC_Setup();
   PinSetup();
   OneWireSetup();
 
@@ -298,6 +308,8 @@ void setup()
   wifiReconnect();
 
   OTA_Setup();
+  Wire.begin( mySDA, mySCL);
+  ADC_Setup();
 
   xTaskCreatePinnedToCore(
     MQTT_Handle,
@@ -354,7 +366,7 @@ void setup()
     updateLed();
   */
 
-  vTaskDelay(1000);
+  //vTaskDelay(1000);
 
   xTaskCreatePinnedToCore(
     Task1,
@@ -379,6 +391,8 @@ void setup()
   print_reset_reason(rtc_get_reset_reason(1));
   DEBUGPRINTLN3(timeOutCounter);
 
+  N2Ksetup();// Initialise N2K
+
   snprintf (msg, 75, "Reset: %u", timeOutCounter );
   MQ_Publish("bps/timeOutCounter", msg);
 }
@@ -388,7 +402,7 @@ void loop(void)
 
   client.loop();
   ArduinoOTA.handle();
-
-  vTaskDelay(500);
+  SendN2kBattery();
+ NMEA2000.ParseMessages();
 
 }
