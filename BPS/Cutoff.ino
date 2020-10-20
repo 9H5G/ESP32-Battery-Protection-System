@@ -104,13 +104,14 @@ void output_Test()
   pinMode(LEDPINHVC, INPUT);
   pinMode(TEMPSIG1, INPUT);
   pinMode(TEMPSIG2, INPUT);
-  pinMode(ADC1, INPUT);
+/*  
+ pinMode(ADC1, INPUT);
   pinMode(ADC2, INPUT);
   pinMode(ADC3, INPUT);
   pinMode(ADC4, INPUT);
 
   pinMode(ADC_SW, OUTPUT);
-
+*/
   digitalWrite(LVCONPIN, HIGH);
   digitalWrite(LVCOFFPIN, HIGH);
   digitalWrite(HVCOFFPIN, HIGH);

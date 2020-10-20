@@ -1,7 +1,7 @@
 void ADC_Setup() {
   ads.setGain(GAIN_TWO);        // 2x gain   +/- 2.048V  1 bit = 1mV      0.0625mV
   ads.begin();
-  ads.setSPS(ADS1115_DR_64SPS);
+//  ads.setSPS(ADS1115_DR_64SPS);
 }
 
 int32_t adcFilter(int adc) {

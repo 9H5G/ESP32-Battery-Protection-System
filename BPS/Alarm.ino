@@ -161,19 +161,30 @@ int calculate_alarms()
 
   // check for 'diverging Delta' fault
   if (delta > deltawarn) {
-    deltaSum = deltaSum + delta;
-    snprintf (msg, 75, "%d", deltaSum);
-    MQ_Publish(DELTASUM, msg);
+
+    if (deltaSum == 0)
+    {
+      deltaSum = delta;
+    }
+    else
+    {
+      if (delta > (deltaSum * 2))
+      {
+        // ESP.restart();
+        Serial.println("");
+        Serial.print("Delta:");
+        Serial.println(deltaSum);
+        Serial.println("");
+        snprintf (msg, 75, "%d", deltaSum);
+        MQ_Publish(DELTASUM, msg);
+        deltaSum = delta;
+      }
+    }
   }
   else
   {
     deltaSum = 0;
   }
-
-  if (deltaSum > 1000) {
-    ESP.restart();
-  }
-
   return alarmstate;
 }
 
@@ -182,10 +193,11 @@ void runalarms(int alarmcode, int oldAlarmCode) {
   if ((alarmcode == lowcut ) || (alarmcode == highcut))
   {
     alarmCount = alarmCount + 1;
+    Serial.println("Alarm Cut");
   }
   snprintf (msg, 75, "%d", alarmCount);
   MQ_Publish("bps/alarmcount", msg);
-  
+
   //Action required
   //Only do the cutoff if it has not worked
   if ((alarmcode == lowcut)  && (alarmCount > alarmLimit)) {
