@@ -52,5 +52,6 @@ other events</font></p>
 <p style="margin-bottom: 0cm; font-weight: normal; line-height: 100%">
 <font face="Noto Mono">	 </font>
 </p>
+Speaks NMEA 2000 for marine systems via fully isolated NMEA transceiver. 
 </body>
 </html>
